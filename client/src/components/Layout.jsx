@@ -10,6 +10,27 @@ const NAV_ITEMS = [
   { id: 'users', label: 'Perfis', Icon: Users },
 ];
 
+function EditionSelector() {
+  const { state, switchEdition } = useApp();
+  const editions = state.editions || [];
+  if (editions.length <= 1) return null;
+
+  return (
+    <select
+      value={state.edition || ''}
+      onChange={(e) => switchEdition(e.target.value)}
+      className="bg-bg-hover text-gray-200 text-xs rounded-lg px-2 py-1.5 border border-border focus:outline-none focus:ring-1 focus:ring-gold cursor-pointer"
+      title="Trocar edição do Oscar"
+    >
+      {editions.map((ed) => (
+        <option key={ed.id} value={ed.id}>
+          {ed.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 function UserDropdown({ onClose }) {
   const { state, login, bootstrap, showToast } = useApp();
   const [newName, setNewName] = useState('');
@@ -52,11 +73,10 @@ function UserDropdown({ onClose }) {
               <button
                 key={u}
                 onClick={() => handleLogin(u)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-100 ${
-                  isActive
-                    ? 'bg-gold-muted text-gold'
-                    : 'text-gray-300 hover:bg-bg-hover'
-                }`}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-100 ${isActive
+                  ? 'bg-gold-muted text-gold'
+                  : 'text-gray-300 hover:bg-bg-hover'
+                  }`}
               >
                 <span>{u}</span>
                 <span className="text-xs text-gray-500">
@@ -107,11 +127,14 @@ export function Layout({ activePage, onChangePage, children }) {
       {/* Top header */}
       <header className="sticky top-0 z-40 border-b border-border bg-bg-base/90 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          {/* Logo */}
+          {/* Logo + Edition */}
           <div className="flex items-center gap-2.5">
             <Trophy className="w-5 h-5 text-gold" />
-            <span className="font-display text-lg text-gray-100 hidden sm:block">Oscar 2026</span>
+            <span className="font-display text-lg text-gray-100 hidden sm:block">
+              {(state.editions || []).find(e => e.id === state.edition)?.label || 'Oscar Watchlist'}
+            </span>
             <span className="font-display text-lg text-gray-100 sm:hidden">Oscar</span>
+            <EditionSelector />
           </div>
 
           {/* Desktop nav */}
@@ -173,9 +196,8 @@ export function Layout({ activePage, onChangePage, children }) {
               <button
                 key={id}
                 onClick={() => onChangePage(id)}
-                className={`nav-tab flex items-center gap-1.5 text-xs py-1.5 px-3 whitespace-nowrap ${
-                  activePage === id ? 'nav-tab-active' : ''
-                }`}
+                className={`nav-tab flex items-center gap-1.5 text-xs py-1.5 px-3 whitespace-nowrap ${activePage === id ? 'nav-tab-active' : ''
+                  }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 {label}

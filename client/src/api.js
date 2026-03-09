@@ -1,5 +1,22 @@
+// Centralized edition state — managed by AppContext
+let _currentEdition = '';
+
+export function setCurrentEdition(editionId) {
+  _currentEdition = editionId || '';
+}
+
+function editionParam() {
+  return _currentEdition ? `edition=${encodeURIComponent(_currentEdition)}` : '';
+}
+
+function appendEdition(url) {
+  const sep = url.includes('?') ? '&' : '?';
+  const ep = editionParam();
+  return ep ? `${url}${sep}${ep}` : url;
+}
+
 async function request(url, options = {}) {
-  const res = await fetch(url, {
+  const res = await fetch(appendEdition(url), {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
@@ -11,6 +28,8 @@ async function request(url, options = {}) {
 export const api = {
   bootstrap: (username = '') =>
     request(`/api/bootstrap?username=${encodeURIComponent(username)}`),
+
+  editions: () => request('/api/editions'),
 
   // Login with password (creates user if new, verifies if existing)
   login: (username, password) =>

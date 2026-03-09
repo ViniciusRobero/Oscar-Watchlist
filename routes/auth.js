@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/login', (req, res) => {
   const username = String(req.body.username || '').trim();
   const password = String(req.body.password || '').trim();
+  const edition = req.query.edition || req.body?.edition || '';
 
   if (!username) return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
   if (username.length > 40) return res.status(400).json({ error: 'Nome de usuário muito longo (máx. 40 caracteres).' });
@@ -16,7 +17,7 @@ router.post('/login', (req, res) => {
   if (password.length < 3) return res.status(400).json({ error: 'Senha muito curta (mín. 3 caracteres).' });
   if (password.length > 100) return res.status(400).json({ error: 'Senha muito longa.' });
 
-  const state = loadState();
+  const state = loadState(edition);
   const existingUser = state.users[username];
 
   if (existingUser) {
@@ -27,16 +28,16 @@ router.post('/login', (req, res) => {
     } else {
       // Legacy user without password — set it now
       existingUser.passwordHash = hashPassword(password);
-      saveState(state);
+      saveState(state, edition);
     }
   } else {
     // New user — create with password
     const ph = hashPassword(password);
     ensureUser(state, username, ph);
-    saveState(state);
+    saveState(state, edition);
   }
 
-  res.json(buildBootstrap(username));
+  res.json(buildBootstrap(username, edition));
 });
 
 // POST /api/auth/register (alias for login — same endpoint handles both)
@@ -48,7 +49,8 @@ router.post('/register', (req, res) => {
 
 // GET /api/auth/users — list usernames (no passwords) for login hints
 router.get('/users', (req, res) => {
-  const state = loadState();
+  const edition = req.query.edition || '';
+  const state = loadState(edition);
   const usernames = Object.keys(state.users).sort((a, b) => a.localeCompare(b));
   res.json({ usernames });
 });

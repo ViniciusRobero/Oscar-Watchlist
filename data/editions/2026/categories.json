@@ -1,0 +1,351 @@
+[
+  {
+    "id": "melhor-filme",
+    "name": "Melhor Filme",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": null},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": null},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": null},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": null},
+      {"id": "sentimental-value", "filmId": "sentimental-value", "nomineeName": null},
+      {"id": "hamnet", "filmId": "hamnet", "nomineeName": null},
+      {"id": "bugonia", "filmId": "bugonia", "nomineeName": null},
+      {"id": "f1", "filmId": "f1", "nomineeName": null},
+      {"id": "the-secret-agent", "filmId": "the-secret-agent", "nomineeName": null},
+      {"id": "train-dreams", "filmId": "train-dreams", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "ator-principal",
+    "name": "Ator (Principal)",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Michael B. Jordan"},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": "Leonardo DiCaprio"},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": "Timothée Chalamet"},
+      {"id": "the-secret-agent", "filmId": "the-secret-agent", "nomineeName": "Wagner Moura"},
+      {"id": "blue-moon", "filmId": "blue-moon", "nomineeName": "Ethan Hawke"}
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "atriz-principal",
+    "name": "Atriz (Principal)",
+    "nominees": [
+      {"id": "sentimental-value", "filmId": "sentimental-value", "nomineeName": "Renate Reinsve"},
+      {"id": "hamnet", "filmId": "hamnet", "nomineeName": "Jessie Buckley"},
+      {"id": "bugonia", "filmId": "bugonia", "nomineeName": "Emma Stone"},
+      {"id": "if-i-had-legs-i-d-kick-you", "filmId": "if-i-had-legs-i-d-kick-you", "nomineeName": "Rose Byrne"},
+      {"id": "song-sung-blue", "filmId": "song-sung-blue", "nomineeName": "Kate Hudson"}
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "ator-coadjuvante",
+    "name": "Ator (Coadjuvante)",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Delroy Lindo"},
+      {"id": "one-battle-after-another-benicio", "filmId": "one-battle-after-another", "nomineeName": "Benicio Del Toro"},
+      {"id": "one-battle-after-another-penn", "filmId": "one-battle-after-another", "nomineeName": "Sean Penn"},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": "Jacob Elordi"},
+      {"id": "sentimental-value", "filmId": "sentimental-value", "nomineeName": "Stellan Skarsgård"}
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "atriz-coadjuvante",
+    "name": "Atriz (Coadjuvante)",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Wunmi Mosaku"},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": "Teyana Taylor"},
+      {"id": "sentimental-value-elle", "filmId": "sentimental-value", "nomineeName": "Elle Fanning"},
+      {"id": "sentimental-value-inga", "filmId": "sentimental-value", "nomineeName": "Inga Ibsdotter Lilleaas"},
+      {"id": "weapons", "filmId": "weapons", "nomineeName": "Amy Madigan"}
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "direcao",
+    "name": "Direção",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Ryan Coogler"},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": "Paul Thomas Anderson"},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": "Josh Safdie"},
+      {"id": "sentimental-value", "filmId": "sentimental-value", "nomineeName": "Joachim Trier"},
+      {"id": "hamnet", "filmId": "hamnet", "nomineeName": "Chloé Zhao"}
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "direcao-de-elenco-casting",
+    "name": "Direção de Elenco (Casting)",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Francine Maisler"},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": "Cassandra Kulukundis"},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": "Jennifer Venditti"},
+      {"id": "hamnet", "filmId": "hamnet", "nomineeName": "Nina Gold"},
+      {"id": "the-secret-agent", "filmId": "the-secret-agent", "nomineeName": "Gabriel Domingues"}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "fotografia",
+    "name": "Fotografia",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Autumn Durald Arkapaw"},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": "Michael Bauman"},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": "Dan Laustsen"},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": "Darius Khondji"},
+      {"id": "train-dreams", "filmId": "train-dreams", "nomineeName": "Adolpho Veloso"}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "figurino",
+    "name": "Figurino",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Ruth E. Carter"},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": "Kate Hawley"},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": "Miyako Bellizzi"},
+      {"id": "hamnet", "filmId": "hamnet", "nomineeName": "Malgosia Turzanska"},
+      {"id": "avatar-fire-and-ash", "filmId": "avatar-fire-and-ash", "nomineeName": "Deborah L. Scott"}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "montagem",
+    "name": "Montagem",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Michael P. Shawver"},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": "Andy Jurgensen"},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": "Ronald Bronstein e Josh Safdie"},
+      {"id": "sentimental-value", "filmId": "sentimental-value", "nomineeName": "Olivier Bugge Coutté"},
+      {"id": "f1", "filmId": "f1", "nomineeName": "Stephen Mirrione"}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "direcao-de-arte-production-design",
+    "name": "Direção de Arte (Production Design)",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": null},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": null},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": null},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": null},
+      {"id": "hamnet", "filmId": "hamnet", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "trilha-sonora-original",
+    "name": "Trilha Sonora Original",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": null},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": null},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": null},
+      {"id": "hamnet", "filmId": "hamnet", "nomineeName": null},
+      {"id": "bugonia", "filmId": "bugonia", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "cancao-original",
+    "name": "Canção Original",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "\"I Lied to You\""},
+      {"id": "train-dreams", "filmId": "train-dreams", "nomineeName": "\"Train Dreams\""},
+      {"id": "kpop-demon-hunters", "filmId": "kpop-demon-hunters", "nomineeName": null},
+      {"id": "diane-warren-relentless", "filmId": "diane-warren-relentless", "nomineeName": null},
+      {"id": "viva-verdi", "filmId": "viva-verdi", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "maquiagem-e-penteados",
+    "name": "Maquiagem e Penteados",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Ken Diaz, Mike Fontaine e Shunika Terry"},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": "Mike Hill, Jordan Samuel e Cliona Furey"},
+      {"id": "kokuho", "filmId": "kokuho", "nomineeName": "Kyoko Toyokawa e Naomi Hibino"},
+      {"id": "the-smashing-machine", "filmId": "the-smashing-machine", "nomineeName": "Kazu Hiro e Glen Griffin"},
+      {"id": "the-ugly-stepsister", "filmId": "the-ugly-stepsister", "nomineeName": "Thomas Foldberg"}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "som",
+    "name": "Som",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": null},
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": null},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": null},
+      {"id": "f1", "filmId": "f1", "nomineeName": null},
+      {"id": "sirat", "filmId": "sirat", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "efeitos-visuais",
+    "name": "Efeitos Visuais",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": null},
+      {"id": "f1", "filmId": "f1", "nomineeName": null},
+      {"id": "avatar-fire-and-ash", "filmId": "avatar-fire-and-ash", "nomineeName": null},
+      {"id": "jurassic-world-rebirth", "filmId": "jurassic-world-rebirth", "nomineeName": null},
+      {"id": "the-lost-bus", "filmId": "the-lost-bus", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "roteiro-original",
+    "name": "Roteiro Original",
+    "nominees": [
+      {"id": "sinners", "filmId": "sinners", "nomineeName": "Ryan Coogler"},
+      {"id": "marty-supreme", "filmId": "marty-supreme", "nomineeName": "Josh Safdie e Ronald Bronstein"},
+      {"id": "sentimental-value", "filmId": "sentimental-value", "nomineeName": "Joachim Trier e Eskil Vogt"},
+      {"id": "blue-moon", "filmId": "blue-moon", "nomineeName": "Richard Linklater"},
+      {"id": "it-was-just-an-accident", "filmId": "it-was-just-an-accident", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "roteiro-adaptado",
+    "name": "Roteiro Adaptado",
+    "nominees": [
+      {"id": "one-battle-after-another", "filmId": "one-battle-after-another", "nomineeName": "Paul Thomas Anderson"},
+      {"id": "frankenstein", "filmId": "frankenstein", "nomineeName": "Guillermo del Toro"},
+      {"id": "hamnet", "filmId": "hamnet", "nomineeName": "Alice Birch"},
+      {"id": "bugonia", "filmId": "bugonia", "nomineeName": "Efthimis Filippou"},
+      {"id": "train-dreams", "filmId": "train-dreams", "nomineeName": "Clint Bentley"}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "longa-de-animacao",
+    "name": "Longa de Animação",
+    "nominees": [
+      {"id": "kpop-demon-hunters", "filmId": "kpop-demon-hunters", "nomineeName": null},
+      {"id": "arco", "filmId": "arco", "nomineeName": null},
+      {"id": "elio", "filmId": "elio", "nomineeName": null},
+      {"id": "little-amelie-or-the-character-of-rain", "filmId": "little-amelie-or-the-character-of-rain", "nomineeName": null},
+      {"id": "zootopia-2", "filmId": "zootopia-2", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "curta-de-animacao",
+    "name": "Curta de Animação",
+    "nominees": [
+      {"id": "butterfly", "filmId": "butterfly", "nomineeName": null},
+      {"id": "forevergreen", "filmId": "forevergreen", "nomineeName": null},
+      {"id": "retirement-plan", "filmId": "retirement-plan", "nomineeName": null},
+      {"id": "the-girl-who-cried-pearls", "filmId": "the-girl-who-cried-pearls", "nomineeName": null},
+      {"id": "the-three-sisters", "filmId": "the-three-sisters", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "documentario-longa",
+    "name": "Documentário (Longa)",
+    "nominees": [
+      {"id": "come-see-me-in-the-good-light", "filmId": "come-see-me-in-the-good-light", "nomineeName": null},
+      {"id": "cutting-through-rocks", "filmId": "cutting-through-rocks", "nomineeName": null},
+      {"id": "mr-nobody-against-putin", "filmId": "mr-nobody-against-putin", "nomineeName": null},
+      {"id": "the-alabama-solution", "filmId": "the-alabama-solution", "nomineeName": null},
+      {"id": "the-perfect-neighbor", "filmId": "the-perfect-neighbor", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "curta-documentario",
+    "name": "Curta-documentário",
+    "nominees": [
+      {"id": "all-the-empty-rooms", "filmId": "all-the-empty-rooms", "nomineeName": null},
+      {"id": "armed-only-with-a-camera-the-life-and-death-of-brent-renaud", "filmId": "armed-only-with-a-camera-the-life-and-death-of-brent-renaud", "nomineeName": null},
+      {"id": "children-no-more-were-and-are-gone", "filmId": "children-no-more-were-and-are-gone", "nomineeName": null},
+      {"id": "perfectly-a-strangeness", "filmId": "perfectly-a-strangeness", "nomineeName": null},
+      {"id": "the-devil-is-busy", "filmId": "the-devil-is-busy", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "curta-metragem-em-live-action",
+    "name": "Curta-metragem em Live Action",
+    "nominees": [
+      {"id": "a-friend-of-dorothy", "filmId": "a-friend-of-dorothy", "nomineeName": null},
+      {"id": "butcher-s-stain", "filmId": "butcher-s-stain", "nomineeName": null},
+      {"id": "jane-austen-s-period-drama", "filmId": "jane-austen-s-period-drama", "nomineeName": null},
+      {"id": "the-singers", "filmId": "the-singers", "nomineeName": null},
+      {"id": "two-people-exchanging-saliva", "filmId": "two-people-exchanging-saliva", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-brasil",
+    "name": "Filme Internacional (Brasil)",
+    "nominees": [
+      {"id": "the-secret-agent", "filmId": "the-secret-agent", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-espanha",
+    "name": "Filme Internacional (Espanha)",
+    "nominees": [
+      {"id": "sirat", "filmId": "sirat", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-franca",
+    "name": "Filme Internacional (França)",
+    "nominees": [
+      {"id": "it-was-just-an-accident", "filmId": "it-was-just-an-accident", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-noruega",
+    "name": "Filme Internacional (Noruega)",
+    "nominees": [
+      {"id": "sentimental-value", "filmId": "sentimental-value", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-tunisia",
+    "name": "Filme Internacional (Tunísia)",
+    "nominees": [
+      {"id": "the-voice-of-hind-rajab", "filmId": "the-voice-of-hind-rajab", "nomineeName": null}
+    ],
+    "officialWinner": null,
+    "highlight": false
+  }
+]

@@ -16,14 +16,14 @@ try {
       }
     }
   }
-} catch {}
+} catch { }
 
 const express = require('express');
 const path = require('path');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
-const { buildBootstrap, loadFilms, loadCategories } = require('./data/db');
+const { buildBootstrap, loadFilms, loadCategories, loadEditions, resolveEdition, saveFilms } = require('./data/db');
 
 const usersRouter = require('./routes/users');
 const predictionsRouter = require('./routes/predictions');
@@ -42,11 +42,21 @@ app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 // ── API ──────────────────────────────────────────────────────
 app.get('/api/bootstrap', (req, res) => {
   const username = String(req.query.username || '').trim();
-  res.json(buildBootstrap(username));
+  const edition = req.query.edition || '';
+  res.json(buildBootstrap(username, edition));
 });
 
-app.get('/api/films', (_req, res) => res.json(loadFilms()));
-app.get('/api/categories', (_req, res) => res.json(loadCategories()));
+app.get('/api/editions', (_req, res) => res.json(loadEditions()));
+
+app.get('/api/films', (req, res) => {
+  const edition = req.query.edition || '';
+  res.json(loadFilms(edition));
+});
+
+app.get('/api/categories', (req, res) => {
+  const edition = req.query.edition || '';
+  res.json(loadCategories(edition));
+});
 
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
@@ -60,7 +70,7 @@ function fetchHttp(url, redirects = 0) {
     const mod = url.startsWith('https') ? https : http;
     const opts = { headers: { 'User-Agent': 'OscarWatchlist/6 node.js' } };
     const req = mod.get(url, opts, (r) => {
-      if ([301,302,303,307,308].includes(r.statusCode) && r.headers.location) {
+      if ([301, 302, 303, 307, 308].includes(r.statusCode) && r.headers.location) {
         return fetchHttp(r.headers.location, redirects + 1).then(resolve).catch(reject);
       }
       const chunks = [];
@@ -85,16 +95,16 @@ async function downloadFile(url, dest) {
   fs.writeFileSync(dest, r.body);
 }
 
-function updateFilmPosterUrl(filmId, posterUrl) {
+function updateFilmPosterUrl(filmId, posterUrl, editionId) {
   try {
-    const p = path.join(__dirname, 'data', 'films.json');
-    const films = JSON.parse(fs.readFileSync(p, 'utf8'));
+    const eid = resolveEdition(editionId);
+    const films = loadFilms(eid);
     const film = films.find((f) => f.id === filmId);
     if (film) {
       film.poster = posterUrl;
-      fs.writeFileSync(p, JSON.stringify(films, null, 2), 'utf8');
+      saveFilms(films, eid);
     }
-  } catch {}
+  } catch { }
 }
 
 // ── Poster sources ───────────────────────────────────────────────────────────
@@ -102,7 +112,7 @@ async function getPosterFromTMDB(imdbId) {
   const key = process.env.TMDB_API_KEY;
   if (!key || !imdbId) throw new Error('no tmdb');
   const d = await fetchJson(`https://api.themoviedb.org/3/find/${imdbId}?api_key=${key}&external_source=imdb_id`);
-  const item = [...(d.movie_results||[]), ...(d.tv_results||[])][0];
+  const item = [...(d.movie_results || []), ...(d.tv_results || [])][0];
   if (!item?.poster_path) throw new Error('no poster');
   return `https://image.tmdb.org/t/p/w500${item.poster_path}`;
 }
@@ -146,8 +156,8 @@ async function getPosterFromWikipedia(title) {
   try {
     const d = await fetchJson(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
     if (d.thumbnail?.source) return d.thumbnail.source.replace(/\/\d+px-/, '/500px-');
-  } catch {}
-  const s = await fetchJson(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(title+' film')}&srlimit=1&format=json`);
+  } catch { }
+  const s = await fetchJson(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(title + ' film')}&srlimit=1&format=json`);
   const pt = s?.query?.search?.[0]?.title;
   if (!pt) throw new Error('not found');
   const d = await fetchJson(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(pt)}&prop=pageimages&format=json&pithumbsize=500`);
@@ -165,7 +175,7 @@ async function fetchPosterUrl(film) {
     () => getPosterFromWikipedia(film.title),
   ];
   for (const fn of sources) {
-    try { return await fn(); } catch {}
+    try { return await fn(); } catch { }
     await new Promise(r => setTimeout(r, 100));
   }
   return null;
@@ -174,6 +184,7 @@ async function fetchPosterUrl(film) {
 // ── Poster proxy (lazy-download, multi-source) ──────────────────────────────
 app.get('/api/poster/:filmId', async (req, res) => {
   const filmId = String(req.params.filmId || '').trim();
+  const edition = req.query.edition || '';
   if (!filmId) return res.json({ posterUrl: null });
 
   const localFile = path.join(COVERS_DIR, `${filmId}.jpg`);
@@ -181,7 +192,7 @@ app.get('/api/poster/:filmId', async (req, res) => {
     return res.json({ posterUrl: `/assets/covers/${filmId}.jpg` });
   }
 
-  const films = loadFilms();
+  const films = loadFilms(edition);
   const film = films.find((f) => f.id === filmId);
   if (!film) return res.json({ posterUrl: null });
 
@@ -189,7 +200,7 @@ app.get('/api/poster/:filmId', async (req, res) => {
     const posterUrl = await fetchPosterUrl(film);
     if (!posterUrl) return res.json({ posterUrl: null });
     await downloadFile(posterUrl, localFile);
-    updateFilmPosterUrl(filmId, `/assets/covers/${filmId}.jpg`);
+    updateFilmPosterUrl(filmId, `/assets/covers/${filmId}.jpg`, edition);
     res.json({ posterUrl: `/assets/covers/${filmId}.jpg` });
   } catch (e) {
     res.json({ posterUrl: null });
@@ -222,7 +233,7 @@ async function prefetchAllPosters() {
 
 // Bulk poster refresh
 app.post('/api/poster/refresh-all', (_req, res) => {
-  prefetchAllPosters().catch(() => {});
+  prefetchAllPosters().catch(() => { });
   res.json({ ok: true, message: 'Buscando capas em background...' });
 });
 
@@ -232,7 +243,10 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
+  const editions = loadEditions();
+  const current = editions.find(e => e.current) || editions[0];
   console.log(`\n  🎬  Oscar Watchlist v6 → http://localhost:${PORT}`);
+  console.log(`  📅  Edição ativa: ${current?.label || 'N/A'}`);
   if (process.env.TMDB_API_KEY) {
     console.log(`  ✓   TMDB API configurada — capas em alta qualidade\n`);
   } else if (process.env.OMDB_API_KEY) {
@@ -242,5 +256,5 @@ app.listen(PORT, () => {
     console.log(`  💡  Para capas de maior qualidade: TMDB_API_KEY=sua_chave npm start\n`);
   }
   // Always try to prefetch missing posters using available sources
-  prefetchAllPosters().catch(() => {});
+  prefetchAllPosters().catch(() => { });
 });

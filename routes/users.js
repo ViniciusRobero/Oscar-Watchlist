@@ -6,25 +6,28 @@ const router = express.Router();
 // Login / create user
 router.post('/login', (req, res) => {
   const username = String(req.body.username || '').trim();
+  const edition = req.query.edition || req.body?.edition || '';
   if (!username) return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
   if (username.length > 40) return res.status(400).json({ error: 'Nome de usuário muito longo.' });
-  const state = loadState();
+  const state = loadState(edition);
   ensureUser(state, username);
-  saveState(state);
-  res.json(buildBootstrap(username));
+  saveState(state, edition);
+  res.json(buildBootstrap(username, edition));
 });
 
 // List all users (for bootstrap)
 router.get('/', (req, res) => {
   const username = String(req.query.active || '').trim();
-  res.json(buildBootstrap(username));
+  const edition = req.query.edition || '';
+  res.json(buildBootstrap(username, edition));
 });
 
 // Update film state for a user
 router.patch('/:username/films/:filmId', (req, res) => {
   const username = String(req.params.username || '').trim();
   const filmId = String(req.params.filmId || '').trim();
-  const state = loadState();
+  const edition = req.query.edition || req.body?.edition || '';
+  const state = loadState(edition);
   const user = ensureUser(state, username);
   if (!user) return res.status(400).json({ error: 'Usuário inválido.' });
 
@@ -40,7 +43,7 @@ router.patch('/:username/films/:filmId', (req, res) => {
   }
   if (personalNotes !== undefined) fs.personalNotes = String(personalNotes).slice(0, 600);
 
-  saveState(state);
+  saveState(state, edition);
   res.json({ ok: true, filmState: fs });
 });
 

@@ -8,17 +8,18 @@ const router = express.Router();
 router.patch('/:username/:categoryId', (req, res) => {
   const username = String(req.params.username || '').trim();
   const categoryId = String(req.params.categoryId || '').trim();
+  const edition = req.query.edition || req.body?.edition || '';
   // Support nomineeId (new) and filmId (legacy)
   const nomineeId = req.body?.nomineeId
     ? String(req.body.nomineeId)
     : req.body?.filmId
-    ? String(req.body.filmId)
-    : '';
-  const state = loadState();
+      ? String(req.body.filmId)
+      : '';
+  const state = loadState(edition);
   const user = ensureUser(state, username);
   if (!user) return res.status(400).json({ error: 'Usuário inválido.' });
   user.predictions[categoryId] = nomineeId || '';
-  saveState(state);
+  saveState(state, edition);
   res.json({ ok: true, predictions: user.predictions });
 });
 

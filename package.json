@@ -10,8 +10,10 @@
     "dev:client": "cd client && npm run dev",
     "build": "cd client && npm install && npm run build",
     "setup": "npm install && npm run build",
+    "test": "node tests/db.test.js",
     "posters": "node scripts/download-posters.js",
-    "posters:force": "node scripts/download-posters.js --force"
+    "posters:force": "node scripts/download-posters.js --force",
+    "new-edition": "node scripts/update-edition.js"
   },
   "dependencies": {
     "express": "^4.21.2"

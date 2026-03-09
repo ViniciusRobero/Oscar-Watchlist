@@ -3,11 +3,41 @@ const path = require('path');
 const crypto = require('crypto');
 
 const DATA_DIR = path.join(__dirname);
-const FILMS_PATH = path.join(DATA_DIR, 'films.json');
-const CATEGORIES_PATH = path.join(DATA_DIR, 'categories.json');
-const STATE_PATH = path.join(DATA_DIR, 'state.json');
+const EDITIONS_DIR = path.join(DATA_DIR, 'editions');
+const EDITIONS_PATH = path.join(DATA_DIR, 'editions.json');
+
+// Legacy paths (kept as fallback)
+const LEGACY_FILMS_PATH = path.join(DATA_DIR, 'films.json');
+const LEGACY_CATEGORIES_PATH = path.join(DATA_DIR, 'categories.json');
+const LEGACY_STATE_PATH = path.join(DATA_DIR, 'state.json');
 
 const SCHEMA_VERSION = 2;
+
+// ── Editions ────────────────────────────────────────────────────────────────
+
+function loadEditions() {
+  try {
+    return JSON.parse(fs.readFileSync(EDITIONS_PATH, 'utf8'));
+  } catch {
+    return [{ id: '2026', label: 'Oscar 2026', year: 2026, current: true }];
+  }
+}
+
+function getCurrentEditionId() {
+  const editions = loadEditions();
+  const current = editions.find(e => e.current);
+  return current ? current.id : editions[0]?.id || '2026';
+}
+
+function resolveEdition(editionId) {
+  return editionId || getCurrentEditionId();
+}
+
+function editionDir(editionId) {
+  return path.join(EDITIONS_DIR, editionId);
+}
+
+// ── Password helpers ────────────────────────────────────────────────────────
 
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -25,6 +55,7 @@ function verifyPassword(password, stored) {
   }
 }
 
+// ── JSON helpers ────────────────────────────────────────────────────────────
 
 function readJson(filePath, fallback) {
   try {
@@ -39,30 +70,50 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');
 }
 
-function loadFilms() {
-  return readJson(FILMS_PATH, []);
+// ── Data loaders (edition-aware) ────────────────────────────────────────────
+
+function loadFilms(editionId) {
+  const eid = resolveEdition(editionId);
+  const edPath = path.join(editionDir(eid), 'films.json');
+  if (fs.existsSync(edPath)) return readJson(edPath, []);
+  // Fallback to legacy
+  return readJson(LEGACY_FILMS_PATH, []);
 }
 
-function loadCategories() {
-  return readJson(CATEGORIES_PATH, []);
+function loadCategories(editionId) {
+  const eid = resolveEdition(editionId);
+  const edPath = path.join(editionDir(eid), 'categories.json');
+  if (fs.existsSync(edPath)) return readJson(edPath, []);
+  return readJson(LEGACY_CATEGORIES_PATH, []);
 }
 
-function loadState() {
+function loadState(editionId) {
+  const eid = resolveEdition(editionId);
   const defaults = { schemaVersion: SCHEMA_VERSION, users: {}, officialResults: {} };
-  const state = readJson(STATE_PATH, defaults);
-  // Migrate v1 -> v2: ensure schemaVersion exists
-  if (!state.schemaVersion) {
-    state.schemaVersion = SCHEMA_VERSION;
-  }
+  const edPath = path.join(editionDir(eid), 'state.json');
+  const state = fs.existsSync(edPath) ? readJson(edPath, defaults) : readJson(LEGACY_STATE_PATH, defaults);
+  if (!state.schemaVersion) state.schemaVersion = SCHEMA_VERSION;
   if (!state.officialResults) state.officialResults = {};
   if (!state.users) state.users = {};
   return state;
 }
 
-function saveState(state) {
+function saveState(state, editionId) {
+  const eid = resolveEdition(editionId);
   state.schemaVersion = SCHEMA_VERSION;
-  writeJson(STATE_PATH, state);
+  const dir = editionDir(eid);
+  fs.mkdirSync(dir, { recursive: true });
+  writeJson(path.join(dir, 'state.json'), state);
 }
+
+function saveFilms(films, editionId) {
+  const eid = resolveEdition(editionId);
+  const dir = editionDir(eid);
+  fs.mkdirSync(dir, { recursive: true });
+  writeJson(path.join(dir, 'films.json'), films);
+}
+
+// ── User helpers ────────────────────────────────────────────────────────────
 
 function ensureUser(state, username, passwordHash = null) {
   const key = String(username || '').trim();
@@ -75,7 +126,6 @@ function ensureUser(state, username, passwordHash = null) {
       createdAt: new Date().toISOString(),
     };
   } else if (passwordHash && !state.users[key].passwordHash) {
-    // Set password on legacy accounts
     state.users[key].passwordHash = passwordHash;
   }
   return state.users[key];
@@ -112,13 +162,17 @@ function summarizeUsers(state) {
     });
 }
 
-function buildBootstrap(username) {
-  const films = loadFilms();
-  const categories = loadCategories();
-  const state = loadState();
+function buildBootstrap(username, editionId) {
+  const eid = resolveEdition(editionId);
+  const films = loadFilms(eid);
+  const categories = loadCategories(eid);
+  const state = loadState(eid);
+  const editions = loadEditions();
   const user = ensureUser(state, username || '');
-  if (user) saveState(state);
+  if (user) saveState(state, eid);
   return {
+    edition: eid,
+    editions,
     films,
     categories,
     users: Object.keys(state.users).sort((a, b) => a.localeCompare(b)),
@@ -130,10 +184,14 @@ function buildBootstrap(username) {
 }
 
 module.exports = {
+  loadEditions,
+  getCurrentEditionId,
+  resolveEdition,
   loadFilms,
   loadCategories,
   loadState,
   saveState,
+  saveFilms,
   ensureUser,
   normalizeFilmState,
   summarizeUsers,

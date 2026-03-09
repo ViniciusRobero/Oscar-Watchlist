@@ -16,14 +16,15 @@ function resolveFilmId(cats, categoryId, nomineeId) {
 // body: { nomineeId } or { filmId } for legacy
 router.patch('/official/:categoryId', (req, res) => {
   const categoryId = String(req.params.categoryId || '').trim();
+  const edition = req.query.edition || req.body?.edition || '';
   const nomineeId = req.body?.nomineeId
     ? String(req.body.nomineeId)
     : req.body?.filmId
-    ? String(req.body.filmId)
-    : '';
-  const state = loadState();
+      ? String(req.body.filmId)
+      : '';
+  const state = loadState(edition);
   state.officialResults[categoryId] = nomineeId || '';
-  saveState(state);
+  saveState(state, edition);
   res.json({ ok: true, officialResults: state.officialResults });
 });
 
@@ -31,8 +32,9 @@ router.patch('/official/:categoryId', (req, res) => {
 router.get('/compare/users', (req, res) => {
   const leftName = String(req.query.left || '').trim();
   const rightName = String(req.query.right || '').trim();
-  const cats = loadCategories();
-  const state = loadState();
+  const edition = req.query.edition || '';
+  const cats = loadCategories(edition);
+  const state = loadState(edition);
   const left = state.users[leftName];
   const right = state.users[rightName];
   if (!left || !right) return res.status(404).json({ error: 'Um ou mais usuários não encontrados.' });
@@ -78,8 +80,9 @@ router.get('/compare/users', (req, res) => {
 // Compare user predictions vs official results
 router.get('/compare/official/:username', (req, res) => {
   const username = String(req.params.username || '').trim();
-  const cats = loadCategories();
-  const state = loadState();
+  const edition = req.query.edition || '';
+  const cats = loadCategories(edition);
+  const state = loadState(edition);
   const user = state.users[username];
   if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
 

@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useCallback } from 'react';
-import { api } from '../api.js';
+import { api, setCurrentEdition } from '../api.js';
 
 const AppContext = createContext(null);
 
@@ -11,6 +11,8 @@ const initialState = {
   profile: { films: {}, predictions: {} },
   activeUser: '',
   officialResults: {},
+  edition: '',
+  editions: [],
   loading: true,
   error: null,
   toast: null,
@@ -66,16 +68,35 @@ export function AppProvider({ children }) {
   }, []);
 
   const bootstrap = useCallback(
-    async (username = '') => {
+    async (username = '', editionId = '') => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
+        if (editionId) setCurrentEdition(editionId);
         const data = await api.bootstrap(username);
+        // Sync edition to api module
+        if (data.edition) setCurrentEdition(data.edition);
         hydrate(data);
       } catch (e) {
         dispatch({ type: 'SET_ERROR', payload: e.message });
       }
     },
     [hydrate]
+  );
+
+  const switchEdition = useCallback(
+    async (editionId) => {
+      setCurrentEdition(editionId);
+      try {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        const data = await api.bootstrap(state.activeUser);
+        if (data.edition) setCurrentEdition(data.edition);
+        hydrate(data);
+        showToast(`Edição: ${data.editions?.find(e => e.id === data.edition)?.label || data.edition}`);
+      } catch (e) {
+        dispatch({ type: 'SET_ERROR', payload: e.message });
+      }
+    },
+    [state.activeUser, hydrate, showToast]
   );
 
   const login = useCallback(
@@ -155,6 +176,7 @@ export function AppProvider({ children }) {
         state,
         dispatch,
         bootstrap,
+        switchEdition,
         login,
         logout,
         updateFilm,
