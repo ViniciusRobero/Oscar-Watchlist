@@ -1,7 +1,3 @@
-/**
- * Re-download incorrect posters using Wikipedia page images.
- * Strategy: search Wikipedia for the film page, find the main infobox image.
- */
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
@@ -9,32 +5,46 @@ const https = require('https');
 const FILMS_PATH = path.join(__dirname, '..', 'data', 'editions', '2026', 'films.json');
 const COVERS_DIR = path.join(__dirname, '..', 'client', 'public', 'assets', 'covers');
 
-// Film ID → Wikipedia article title (exact)
-const WIKI_TITLES = {
-    'one-battle-after-another': 'One_Battle_After_Another',
-    'frankenstein': 'Frankenstein_(2025_film)',
-    'hamnet': 'Hamnet_(film)',
-    'f1': 'F1_(film)',
-    'the-secret-agent': 'The_Secret_Agent_(2025_film)',
-    'train-dreams': 'Train_Dreams_(film)',
-    'butcher-s-stain': null, // short film, unlikely on Wikipedia
-    'children-no-more-were-and-are-gone': null,
-    'butterfly': null, // animated short
-    'elio': 'Elio_(film)',
-    'jurassic-world-rebirth': 'Jurassic_World_Rebirth',
-    'the-smashing-machine': 'The_Smashing_Machine_(2025_film)',
-    'diane-warren-relentless': 'Diane_Warren:_Relentless',
-    'mr-nobody-against-putin': null,
-    'the-voice-of-hind-rajab': 'The_Voice_of_Hind_Rajab',
+// URLs extracted from browser DOM/network requests on IMDb pages
+const POSTER_URLS = {
+    'hamnet': 'https://m.media-amazon.com/images/M/MV5BMDQ5ZmY0OWYtOTYzZi00Mzg5LWE3N2EtMjYwZTAzZmJhYjkyXkEyXkFqcGc@._V1_FMjpg_UX1080_.jpg',
+    'f1': 'https://m.media-amazon.com/images/M/MV5BNGI0MDI4NjEtOWU3ZS00ODQyLWFhYTgtNGYxM2ZkM2Q2YjE3XkEyXkFqcGc@._V1_QL75_UX380_CR0,0,380,562_.jpg',
+    'all-the-empty-rooms': 'https://m.media-amazon.com/images/M/MV5BNjg5ZTJjOGEtMThkMy00MTY0LTk2YjctMWY5ZmU5YTZjZjI0XkEyXkFqcGc@._V1_QL75_UY562_CR91,0,380,562_.jpg',
+    'arco': 'https://m.media-amazon.com/images/M/MV5BNjNmYmEzZDAtMjcxYS00NmRjLWI5ZGEtY2NiMmQ2MTE3MTM0XkEyXkFqcGc@._V1_FMjpg_UY2048_.jpg',
+    'butcher-s-stain': 'https://m.media-amazon.com/images/M/MV5BYTQ2NDM4MzYtYjM5ZS00YTcyLWI2ZjktN2U4YjdmMzAxZDEzXkEyXkFqcGc@._V1_QL75_UY562_CR35,0,380,562_.jpg',
+    'butterfly': 'https://m.media-amazon.com/images/M/MV5BYTAyZDNkNDEtZTE4YS00YTM5LWI5YmUtYzNiNTQwZDEwMzY4XkEyXkFqcGc@._V1_QL75_UX380_CR0,4,380,562_.jpg',
+    'children-no-more-were-and-are-gone': 'https://m.media-amazon.com/images/M/MV5BOGMwMDJlMzAtNThhMS00MTY0LTk2YjctMWY5ZmU5YTZjZjI0XkEyXkFqcGc@._V1_QL75_UY562_CR8,0,380,562_.jpg',
+    'cutting-through-rocks': 'https://m.media-amazon.com/images/M/MV5BYmZkZmU2OTctM2U4Ny00NmMyLWFmZTktMjk4MDJkY2QyZDdiXkEyXkFqcGc@._V1_QL75_UY562_CR7,0,380,562_.jpg',
+    'retirement-plan': 'https://m.media-amazon.com/images/M/MV5BZjkyYjUxYWEtZDU0NC00NmRkLThjOTYtZDgyZTlhMDI1OTQ4XkEyXkFqcGc@._V1_QL75_UY562_CR9,0,380,562_.jpg',
+    'diane-warren-relentless': 'https://m.media-amazon.com/images/M/MV5BMTQ3YzZhMjctYTM3MC00YjZhLWE1ZjQtOGRlNjM2OTRmZGE3XkEyXkFqcGc@._V1_QL75_UY562_CR0,0,380,562_.jpg',
+    'forevergreen': 'https://m.media-amazon.com/images/M/MV5BYzcxOGVhMzEtYWJkMi00MGY4LWFmYmMtZThhN2E1NzQ0Y2M4XkEyXkFqcGc@._V1_QL75_UY562_CR16,0,380,562_.jpg',
+    'mr-nobody-against-putin': 'https://m.media-amazon.com/images/M/MV5BYWVjNGQ5NjYtZDk2My00NzgxLWE1NDMtOGEzYTQzMjAxODIxXkEyXkFqcGc@._V1_QL75_UY562_CR8,0,380,562_.jpg',
+    'the-smashing-machine': 'https://m.media-amazon.com/images/M/MV5BMWZkMDAyOTItOWM5My00ODc4LTlkOGUtYWFiN2E3NDEwZWY3XkEyXkFqcGc@._V1_QL75_UY562_CR28,0,380,562_.jpg',
+    'the-three-sisters': 'https://m.media-amazon.com/images/M/MV5BMzM3MjZlYjUtMTU3Ni00MWVjLWEzNjItODNiNDQ2NzFjYTdkXkEyXkFqcGc@._V1_QL75_UY562_CR9,0,380,562_.jpg',
+    'the-voice-of-hind-rajab': 'https://m.media-amazon.com/images/M/MV5BZWVlM2RjYTctODU4Mi00NTQzLWEzMDktZGVmYTQ2NTEwOWFiXkEyXkFqcGc@._V1_QL75_UX380_CR0,0,380,562_.jpg',
 };
 
-function httpGet(url) {
+function download(url) {
     return new Promise((resolve, reject) => {
         const u = new URL(url);
-        const opts = { hostname: u.hostname, path: u.pathname + u.search, headers: { 'User-Agent': 'OscarWatchlistBot/1.0 (poster downloader)' } };
-        https.get(opts, res => {
+        https.get({
+            hostname: u.hostname,
+            path: u.pathname + (u.search || ''),
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://www.imdb.com/',
+                'sec-ch-ua': '"Chromium";v="131", "Not_A Brand";v="24"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'image',
+                'sec-fetch-mode': 'no-cors',
+                'sec-fetch-site': 'cross-site'
+            }
+        }, res => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                return httpGet(res.headers.location).then(resolve).catch(reject);
+                return download(res.headers.location).then(resolve).catch(reject);
             }
             const chunks = [];
             res.on('data', c => chunks.push(c));
@@ -43,88 +53,50 @@ function httpGet(url) {
     });
 }
 
-async function getWikipediaImage(wikiTitle) {
-    // Use Wikipedia API to get page images
-    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(wikiTitle)}&prop=pageimages&format=json&pithumbsize=500`;
-    try {
-        const { body } = await httpGet(url);
-        const data = JSON.parse(body.toString());
-        const pages = data.query?.pages;
-        if (!pages) return null;
-        const page = Object.values(pages)[0];
-        if (page && page.thumbnail && page.thumbnail.source) {
-            // Get the original-resolution image (replace thumb path)
-            let src = page.thumbnail.source;
-            // If it's a thumb URL, try to get a larger version (w500)
-            if (src.includes('/thumb/')) {
-                // Get the 500px version
-                const parts = src.split('/');
-                parts[parts.length - 1] = '500px-' + parts[parts.length - 1].replace(/^\d+px-/, '');
-                src = parts.join('/');
-            }
-            return src;
-        }
-    } catch (e) {
-        console.error(`  Wikipedia API error for "${wikiTitle}":`, e.message);
-    }
-    return null;
-}
-
-async function downloadImage(url, filepath) {
-    try {
-        const { status, body } = await httpGet(url);
-        if (status === 200 && body.length > 3000) {
-            fs.writeFileSync(filepath, body);
-            return true;
-        }
-        console.log(`  ⚠ HTTP ${status}, size ${body.length} bytes`);
-    } catch (e) {
-        console.error(`  Download error:`, e.message);
-    }
-    return false;
-}
-
 async function main() {
     const films = JSON.parse(fs.readFileSync(FILMS_PATH, 'utf8'));
-    let success = 0, failed = 0, skipped = 0;
+    let ok = 0, fail = 0;
 
-    for (const [filmId, wikiTitle] of Object.entries(WIKI_TITLES)) {
+    for (const [filmId, url] of Object.entries(POSTER_URLS)) {
         const film = films.find(f => f.id === filmId);
-        if (!film) { console.log(`  ⚠ ${filmId} not found`); continue; }
-
-        if (!wikiTitle) {
-            console.log(`\n⏭  ${film.title} → No Wikipedia article, skipping`);
-            skipped++;
-            continue;
-        }
-
+        if (!film) { console.log(`⚠ ${filmId} not found`); continue; }
         const dest = path.join(COVERS_DIR, `${filmId}.jpg`);
-        console.log(`\n🔍 ${film.title} → Wikipedia: "${wikiTitle}"`);
 
-        const imageUrl = await getWikipediaImage(wikiTitle);
-        if (!imageUrl) {
-            console.log(`  ❌ No image found`);
-            failed++;
+        // Skip if already exists and is large enough
+        if (fs.existsSync(dest) && fs.statSync(dest).size > 5000) {
+            film.poster = `/assets/covers/${filmId}.jpg`;
+            ok++;
             continue;
         }
 
-        console.log(`  📥 Downloading: ${imageUrl.substring(0, 80)}...`);
-        const ok = await downloadImage(imageUrl, dest);
-        if (ok) {
-            film.poster = `/assets/covers/${filmId}.jpg`;
-            const sizeKB = (fs.statSync(dest).size / 1024).toFixed(1);
-            console.log(`  ✅ Saved! (${sizeKB} KB)`);
-            success++;
-        } else {
-            console.log(`  ❌ Download failed`);
-            failed++;
+        process.stdout.write(`📥 ${film.title}... `);
+        try {
+            const { status, body } = await download(url);
+            if (status === 200 && body.length > 3000) {
+                fs.writeFileSync(dest, body);
+                film.poster = `/assets/covers/${filmId}.jpg`;
+                console.log(`✅ ${(body.length / 1024).toFixed(0)} KB`);
+                ok++;
+            } else {
+                console.log(`❌ HTTP ${status}, ${body.length} bytes`);
+                fail++;
+            }
+        } catch (e) {
+            console.log(`❌ ${e.message}`);
+            fail++;
         }
 
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 200));
     }
 
     fs.writeFileSync(FILMS_PATH, JSON.stringify(films, null, 2), 'utf8');
-    console.log(`\n🏁 Done: ${success} downloaded, ${failed} failed, ${skipped} skipped`);
+    console.log(`\n🏁 ${ok} ok, ${fail} failed`);
+    const still = films.filter(f => f.poster.endsWith('.svg'));
+    if (still.length > 0) {
+        console.log(`Still SVG (${still.length}): ${still.map(f => f.id).join(', ')}`);
+    } else {
+        console.log('🎉 ALL 50 films have poster images!');
+    }
 }
 
-main().catch(console.error);
+main();
