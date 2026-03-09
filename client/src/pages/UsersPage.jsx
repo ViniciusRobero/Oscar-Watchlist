@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PlusCircle, LogIn, Users, Star, Trophy, Eye, Lock, EyeOff, AlertCircle } from 'lucide-react';
+import { PlusCircle, LogIn, Users, Star, Trophy, Eye, Lock, EyeOff, AlertCircle, Shield } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import { api } from '../api.js';
 
@@ -29,9 +29,8 @@ function UserCard({ summary, isActive, onSelect, onLogout }) {
 
   return (
     <article
-      className={`card p-5 transition-all duration-150 ${
-        isActive ? 'border-gold-dim ring-1 ring-gold-dim/30' : 'hover:border-border-active hover:shadow-xl hover:shadow-black/30'
-      }`}
+      className={`card p-5 transition-all duration-150 ${isActive ? 'border-gold-dim ring-1 ring-gold-dim/30' : 'hover:border-border-active hover:shadow-xl hover:shadow-black/30'
+        }`}
     >
       <div className="flex items-start justify-between mb-3">
         <div>
@@ -62,7 +61,7 @@ function UserCard({ summary, isActive, onSelect, onLogout }) {
               <Lock className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => { if(window.confirm('Sair do perfil?')) onLogout(); }}
+              onClick={() => { if (window.confirm('Sair do perfil?')) onLogout(); }}
               className="btn text-xs py-1.5 px-3 text-red-400 border-red-900/40 hover:border-red-700/60"
               title="Sair do perfil"
             >
@@ -144,7 +143,7 @@ function UserCard({ summary, isActive, onSelect, onLogout }) {
 }
 
 export function UsersPage() {
-  const { state, login, logout, showToast } = useApp();
+  const { state, login, register, logout, showToast } = useApp();
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -154,6 +153,7 @@ export function UsersPage() {
 
   async function handleLogin(username, password) {
     await login(username, password);
+    localStorage.setItem('oscar_active_user', username);
   }
 
   async function handleCreate(e) {
@@ -161,11 +161,12 @@ export function UsersPage() {
     setCreateError('');
     if (!newName.trim()) return;
     if (!newPassword.trim()) return setCreateError('Senha obrigatória.');
-    if (newPassword.length < 3) return setCreateError('Senha deve ter ao menos 3 caracteres.');
+    if (newPassword.length < 6) return setCreateError('Senha deve ter ao menos 6 caracteres.');
     if (newPassword !== confirmPassword) return setCreateError('Senhas não coincidem.');
     setCreating(true);
     try {
-      await login(newName.trim(), newPassword.trim());
+      await register(newName.trim(), newPassword.trim());
+      localStorage.setItem('oscar_active_user', newName.trim());
       setNewName('');
       setNewPassword('');
       setConfirmPassword('');
@@ -201,7 +202,7 @@ export function UsersPage() {
               type={showPw ? 'text' : 'password'}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Senha (mín. 3 caracteres)"
+              placeholder="Senha (mín. 6 caracteres)"
               className="input w-full pr-10"
             />
             <button

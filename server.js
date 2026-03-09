@@ -23,6 +23,9 @@ const path = require('path');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const { buildBootstrap, loadFilms, loadCategories, loadEditions, resolveEdition, saveFilms } = require('./data/db');
 
 const usersRouter = require('./routes/users');
@@ -33,6 +36,35 @@ const authRouter = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const COVERS_DIR = path.join(__dirname, 'client', 'public', 'assets', 'covers');
+
+// ── Security Middleware ──────────────────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false, // disabled for SPA
+  crossOriginEmbedderPolicy: false,
+}));
+
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Rate limiting for auth routes
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,             // 10 requests per minute
+  message: { error: 'Muitas tentativas. Tente novamente em 1 minuto.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,              // 5 registrations per minute
+  message: { error: 'Muitas tentativas de registro. Tente novamente em 1 minuto.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'client', 'dist')));
@@ -58,6 +90,8 @@ app.get('/api/categories', (req, res) => {
   res.json(loadCategories(edition));
 });
 
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', registerLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/predictions', predictionsRouter);

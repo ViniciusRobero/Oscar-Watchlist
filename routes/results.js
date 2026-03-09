@@ -1,5 +1,6 @@
 const express = require('express');
 const { loadState, saveState, loadCategories, loadFilms } = require('../data/db');
+const { authenticate, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -12,9 +13,9 @@ function resolveFilmId(cats, categoryId, nomineeId) {
   return nominee?.filmId || nomineeId; // filmId or fallback to nomineeId
 }
 
-// Set official winner for a category
+// Set official winner for a category (ADMIN ONLY)
 // body: { nomineeId } or { filmId } for legacy
-router.patch('/official/:categoryId', (req, res) => {
+router.patch('/official/:categoryId', authenticate, requireAdmin, (req, res) => {
   const categoryId = String(req.params.categoryId || '').trim();
   const edition = req.query.edition || req.body?.edition || '';
   const nomineeId = req.body?.nomineeId

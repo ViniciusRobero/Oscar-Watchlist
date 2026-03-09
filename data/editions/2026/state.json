@@ -15,6 +15,27 @@
         "melhor-filme": "sinners"
       },
       "createdAt": "2026-03-02T23:17:31.336Z"
+    },
+    "vinicius": {
+      "passwordHash": "4b15f3ab2148acfd897ad4b83abdcb76:fda15b092f1add3844dcfaba9b2d25aa4957bc74bbc1149d0445561612f6eb35999b33c2fd0769466275b393781078f6ca40079a3dbf44a0c26eb730d01f39be",
+      "films": {},
+      "predictions": {
+        "melhor-filme": "",
+        "ator-principal": "marty-supreme"
+      },
+      "createdAt": "2026-03-09T21:09:39.586Z"
+    },
+    "TestAuth": {
+      "passwordHash": "db39a0683cf3864471d28ea384945b44:b10aca26bc729a704510e1b539689e950302ee3c61358174534b0e9748262366733a93b479b47ed63b9146b4072986e69f5cf954023d34f639a0834259db5a9a",
+      "films": {
+        "sinners": {
+          "watched": true,
+          "personalRating": null,
+          "personalNotes": ""
+        }
+      },
+      "predictions": {},
+      "createdAt": "2026-03-09T21:39:17.010Z"
     }
   },
   "officialResults": {},

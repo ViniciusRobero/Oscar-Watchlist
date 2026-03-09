@@ -1,5 +1,6 @@
 const express = require('express');
 const { loadState, saveState, ensureUser, buildBootstrap } = require('../data/db');
+const { authenticate, requireSameUserOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -22,8 +23,8 @@ router.get('/', (req, res) => {
   res.json(buildBootstrap(username, edition));
 });
 
-// Update film state for a user
-router.patch('/:username/films/:filmId', (req, res) => {
+// Update film state for a user (protected)
+router.patch('/:username/films/:filmId', authenticate, requireSameUserOrAdmin, (req, res) => {
   const username = String(req.params.username || '').trim();
   const filmId = String(req.params.filmId || '').trim();
   const edition = req.query.edition || req.body?.edition || '';

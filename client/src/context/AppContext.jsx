@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useCallback } from 'react';
-import { api, setCurrentEdition } from '../api.js';
+import { api, setCurrentEdition, setTokens, clearTokens, isAuthenticated as checkAuth } from '../api.js';
 
 const AppContext = createContext(null);
 
@@ -16,6 +16,8 @@ const initialState = {
   loading: true,
   error: null,
   toast: null,
+  isAuthenticated: false,
+  userRole: 'user',
 };
 
 function reducer(state, action) {
@@ -72,10 +74,27 @@ export function AppProvider({ children }) {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         if (editionId) setCurrentEdition(editionId);
+
+        // Try to restore session from refresh token if no username provided
+        if (!username) {
+          const restored = await api.restoreSession();
+          if (restored) {
+            // Get the username from the token (it's in the JWT payload)
+            const savedUser = localStorage.getItem('oscar_active_user') || '';
+            username = savedUser;
+          }
+        }
+
         const data = await api.bootstrap(username);
-        // Sync edition to api module
         if (data.edition) setCurrentEdition(data.edition);
-        hydrate(data);
+        hydrate({
+          ...data,
+          isAuthenticated: checkAuth(),
+          userRole: data.userRole || 'user',
+        });
+
+        // Persist active user for session restoration
+        if (username) localStorage.setItem('oscar_active_user', username);
       } catch (e) {
         dispatch({ type: 'SET_ERROR', payload: e.message });
       }
@@ -102,15 +121,40 @@ export function AppProvider({ children }) {
   const login = useCallback(
     async (username, password) => {
       const data = await api.login(username, password);
-      hydrate(data);
+      hydrate({
+        ...data,
+        isAuthenticated: true,
+        userRole: data.userRole || 'user',
+      });
       showToast(`Bem-vindo, ${username}!`);
     },
     [hydrate, showToast]
   );
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('oscar_active_user');
-    dispatch({ type: 'HYDRATE', payload: { activeUser: '', profile: { films: {}, predictions: {} } } });
+  const register = useCallback(
+    async (username, password) => {
+      const data = await api.register(username, password);
+      hydrate({
+        ...data,
+        isAuthenticated: true,
+        userRole: 'user',
+      });
+      showToast(`Conta criada! Bem-vindo, ${username}!`);
+    },
+    [hydrate, showToast]
+  );
+
+  const logout = useCallback(async () => {
+    await api.logout();
+    dispatch({
+      type: 'HYDRATE',
+      payload: {
+        activeUser: '',
+        profile: { films: {}, predictions: {} },
+        isAuthenticated: false,
+        userRole: 'user',
+      },
+    });
     showToast('Saiu do perfil.');
   }, [showToast]);
 
@@ -178,6 +222,7 @@ export function AppProvider({ children }) {
         bootstrap,
         switchEdition,
         login,
+        register,
         logout,
         updateFilm,
         savePrediction,
