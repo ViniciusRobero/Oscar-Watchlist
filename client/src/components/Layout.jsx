@@ -31,32 +31,40 @@ function EditionSelector() {
   );
 }
 
-function UserDropdown({ onClose }) {
-  const { state, login, bootstrap, showToast } = useApp();
-  const [newName, setNewName] = useState('');
-  const [creating, setCreating] = useState(false);
+function UserDropdown({ onClose, onNavigate }) {
+  const { state, login, logout, showToast } = useApp();
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  async function handleLogin(username) {
+  function selectUser(username) {
+    if (username === state.activeUser) return; // already active
+    setSelectedUser(username);
+    setPassword('');
+    setError('');
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    if (!password.trim()) return;
+    setLoading(true);
+    setError('');
     try {
-      await login(username);
+      await login(selectedUser, password.trim());
+      localStorage.setItem('oscar_active_user', selectedUser);
       onClose();
-    } catch (e) {
-      showToast(e.message, 'error');
+    } catch (err) {
+      setError(err.message || 'Senha incorreta.');
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function handleCreate(e) {
-    e.preventDefault();
-    if (!newName.trim()) return;
-    setCreating(true);
-    try {
-      await login(newName.trim());
-      setNewName('');
+  function handleLogout() {
+    if (window.confirm('Sair do perfil?')) {
+      logout();
       onClose();
-    } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
-      setCreating(false);
     }
   }
 
@@ -69,45 +77,78 @@ function UserDropdown({ onClose }) {
           {state.users.map((u) => {
             const summary = state.userSummaries.find((s) => s.username === u);
             const isActive = u === state.activeUser;
+            const isSelected = u === selectedUser;
             return (
-              <button
-                key={u}
-                onClick={() => handleLogin(u)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-100 ${isActive
-                  ? 'bg-gold-muted text-gold'
-                  : 'text-gray-300 hover:bg-bg-hover'
-                  }`}
-              >
-                <span>{u}</span>
-                <span className="text-xs text-gray-500">
-                  {summary ? `${summary.watchedCount} films · ${summary.predictionsCount} palpites` : ''}
-                </span>
-              </button>
+              <div key={u}>
+                <button
+                  onClick={() => isActive ? null : selectUser(u)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-100 ${isActive
+                    ? 'bg-gold-muted text-gold cursor-default'
+                    : isSelected
+                      ? 'bg-bg-hover text-gray-100'
+                      : 'text-gray-300 hover:bg-bg-hover'
+                    }`}
+                >
+                  <span>{u}</span>
+                  {isActive ? (
+                    <span className="text-xs badge badge-gold py-0.5 px-2">Ativo</span>
+                  ) : (
+                    <span className="text-xs text-gray-500">
+                      {summary ? `${summary.watchedCount} filmes` : ''}
+                    </span>
+                  )}
+                </button>
+
+                {/* Inline password field for selected user */}
+                {isSelected && (
+                  <form onSubmit={handleLogin} className="px-3 pb-2 pt-1">
+                    <div className="flex gap-2">
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Digite a senha"
+                        className="input flex-1 text-sm py-1.5"
+                        autoFocus
+                        onKeyDown={(e) => e.key === 'Escape' && setSelectedUser(null)}
+                      />
+                      <button
+                        type="submit"
+                        disabled={!password.trim() || loading}
+                        className="btn btn-gold px-3 py-1.5 text-xs"
+                      >
+                        {loading ? '...' : 'OK'}
+                      </button>
+                    </div>
+                    {error && (
+                      <p className="text-xs text-red-400 mt-1">{error}</p>
+                    )}
+                  </form>
+                )}
+              </div>
             );
           })}
+
+          {/* Logout current user */}
+          {state.activeUser && (
+            <button
+              onClick={handleLogout}
+              className="w-full text-left px-3 py-2 rounded-xl text-xs text-red-400 hover:bg-bg-hover transition-colors mt-1"
+            >
+              Sair do perfil
+            </button>
+          )}
         </div>
       )}
 
-      {/* Create new */}
-      <form onSubmit={handleCreate} className="p-3">
-        <p className="meta-label mb-2">Novo perfil</p>
-        <div className="flex gap-2">
-          <input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Seu nome"
-            className="input flex-1"
-            maxLength={40}
-          />
-          <button
-            type="submit"
-            disabled={!newName.trim() || creating}
-            className="btn btn-gold px-3 py-2 text-xs"
-          >
-            <PlusCircle className="w-4 h-4" />
-          </button>
-        </div>
-      </form>
+      {/* Link to Perfis page to create account */}
+      <button
+        onClick={() => { onNavigate('users'); onClose(); }}
+        className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-400 hover:bg-bg-hover transition-colors"
+      >
+        <Users className="w-4 h-4" />
+        Criar conta / ver perfis
+      </button>
     </div>
   );
 }
@@ -182,7 +223,7 @@ export function Layout({ activePage, onChangePage, children }) {
                   onClick={() => setShowUserDropdown(false)}
                 />
                 <div className="z-50 relative">
-                  <UserDropdown onClose={() => setShowUserDropdown(false)} />
+                  <UserDropdown onClose={() => setShowUserDropdown(false)} onNavigate={onChangePage} />
                 </div>
               </>
             )}
