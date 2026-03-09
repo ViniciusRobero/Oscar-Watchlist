@@ -1,0 +1,349 @@
+[
+  {
+    "id": "melhor-filme",
+    "name": "Melhor Filme",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "frankenstein",
+      "marty-supreme",
+      "sentimental-value",
+      "hamnet",
+      "bugonia",
+      "f1",
+      "the-secret-agent",
+      "train-dreams"
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "ator-principal",
+    "name": "Ator (Principal)",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "marty-supreme",
+      "the-secret-agent",
+      "blue-moon"
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "atriz-principal",
+    "name": "Atriz (Principal)",
+    "nomineeIds": [
+      "sentimental-value",
+      "hamnet",
+      "bugonia",
+      "if-i-had-legs-i-d-kick-you",
+      "song-sung-blue"
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "cancao-original",
+    "name": "Canção Original",
+    "nomineeIds": [
+      "sinners",
+      "train-dreams",
+      "kpop-demon-hunters",
+      "diane-warren-relentless",
+      "viva-verdi"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "curta-de-animacao",
+    "name": "Curta de Animação",
+    "nomineeIds": [
+      "butterfly",
+      "forevergreen",
+      "retirement-plan",
+      "the-girl-who-cried-pearls",
+      "the-three-sisters"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "curta-documentario",
+    "name": "Curta-documentário",
+    "nomineeIds": [
+      "all-the-empty-rooms",
+      "armed-only-with-a-camera-the-life-and-death-of-brent-renaud",
+      "children-no-more-were-and-are-gone",
+      "perfectly-a-strangeness",
+      "the-devil-is-busy"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "curta-metragem-em-live-action",
+    "name": "Curta-metragem em Live Action",
+    "nomineeIds": [
+      "a-friend-of-dorothy",
+      "butcher-s-stain",
+      "jane-austen-s-period-drama",
+      "the-singers",
+      "two-people-exchanging-saliva"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "direcao",
+    "name": "Direção",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "marty-supreme",
+      "sentimental-value",
+      "hamnet"
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "direcao-de-arte-production-design",
+    "name": "Direção de Arte (Production Design)",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "frankenstein",
+      "marty-supreme",
+      "hamnet"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "direcao-de-elenco-casting",
+    "name": "Direção de Elenco (Casting)",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "marty-supreme",
+      "hamnet",
+      "the-secret-agent"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "documentario-longa",
+    "name": "Documentário (Longa)",
+    "nomineeIds": [
+      "come-see-me-in-the-good-light",
+      "cutting-through-rocks",
+      "mr-nobody-against-putin",
+      "the-alabama-solution",
+      "the-perfect-neighbor"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "efeitos-visuais",
+    "name": "Efeitos Visuais",
+    "nomineeIds": [
+      "sinners",
+      "f1",
+      "avatar-fire-and-ash",
+      "jurassic-world-rebirth",
+      "the-lost-bus"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "figurino",
+    "name": "Figurino",
+    "nomineeIds": [
+      "sinners",
+      "frankenstein",
+      "marty-supreme",
+      "hamnet",
+      "avatar-fire-and-ash"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "fotografia",
+    "name": "Fotografia",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "frankenstein",
+      "marty-supreme",
+      "train-dreams"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "longa-de-animacao",
+    "name": "Longa de Animação",
+    "nomineeIds": [
+      "kpop-demon-hunters",
+      "arco",
+      "elio",
+      "little-amelie-or-the-character-of-rain",
+      "zootopia-2"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "maquiagem-e-penteados",
+    "name": "Maquiagem e Penteados",
+    "nomineeIds": [
+      "sinners",
+      "frankenstein",
+      "kokuho",
+      "the-smashing-machine",
+      "the-ugly-stepsister"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "montagem",
+    "name": "Montagem",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "marty-supreme",
+      "sentimental-value",
+      "f1"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "roteiro-adaptado",
+    "name": "Roteiro Adaptado",
+    "nomineeIds": [
+      "one-battle-after-another",
+      "frankenstein",
+      "hamnet",
+      "bugonia",
+      "train-dreams"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "roteiro-original",
+    "name": "Roteiro Original",
+    "nomineeIds": [
+      "sinners",
+      "marty-supreme",
+      "sentimental-value",
+      "blue-moon",
+      "it-was-just-an-accident"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "som",
+    "name": "Som",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "frankenstein",
+      "f1",
+      "sirat"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "trilha-sonora-original",
+    "name": "Trilha Sonora Original",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "frankenstein",
+      "hamnet",
+      "bugonia"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "ator-coadjuvante",
+    "name": "Ator (Coadjuvante)",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "frankenstein",
+      "sentimental-value"
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "atriz-coadjuvante",
+    "name": "Atriz (Coadjuvante)",
+    "nomineeIds": [
+      "sinners",
+      "one-battle-after-another",
+      "sentimental-value",
+      "weapons"
+    ],
+    "officialWinner": null,
+    "highlight": true
+  },
+  {
+    "id": "filme-internacional-brasil",
+    "name": "Filme Internacional (Brasil)",
+    "nomineeIds": [
+      "the-secret-agent"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-espanha",
+    "name": "Filme Internacional (Espanha)",
+    "nomineeIds": [
+      "sirat"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-franca",
+    "name": "Filme Internacional (França)",
+    "nomineeIds": [
+      "it-was-just-an-accident"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-noruega",
+    "name": "Filme Internacional (Noruega)",
+    "nomineeIds": [
+      "sentimental-value"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  },
+  {
+    "id": "filme-internacional-tunisia",
+    "name": "Filme Internacional (Tunísia)",
+    "nomineeIds": [
+      "the-voice-of-hind-rajab"
+    ],
+    "officialWinner": null,
+    "highlight": false
+  }
+]

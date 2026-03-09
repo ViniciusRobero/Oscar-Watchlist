@@ -1,0 +1,1239 @@
+[
+  {
+    "id": "sinners",
+    "title": "Sinners",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 16,
+    "categories": [
+      "Ator (Principal)",
+      "Ator (Coadjuvante)",
+      "Atriz (Coadjuvante)",
+      "Direção de Elenco (Casting)",
+      "Fotografia",
+      "Figurino",
+      "Direção",
+      "Montagem",
+      "Maquiagem e Penteados",
+      "Trilha Sonora Original",
+      "Canção Original",
+      "Melhor Filme",
+      "Direção de Arte (Production Design)",
+      "Som",
+      "Efeitos Visuais",
+      "Roteiro Original"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt31193180/",
+    "imdbRating": 7.3,
+    "watchLinks": [
+      {
+        "label": "HBO Max",
+        "url": "https://www.hbomax.com/movies/sinners/2a072173-2bac-43ba-9933-10eba021ed96",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Irmãos gêmeos retornam à cidade natal para recomeçar a vida, mas descobrem um mal ainda maior os esperando. O épico musical de Ryan Coogler que lidera o Oscar 2026 com recordistas 16 indicações.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/sinners.svg"
+  },
+  {
+    "id": "one-battle-after-another",
+    "title": "One Battle after Another",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 13,
+    "categories": [
+      "Ator (Principal)",
+      "Ator (Coadjuvante)",
+      "Atriz (Coadjuvante)",
+      "Direção de Elenco (Casting)",
+      "Fotografia",
+      "Direção",
+      "Montagem",
+      "Trilha Sonora Original",
+      "Melhor Filme",
+      "Direção de Arte (Production Design)",
+      "Som",
+      "Roteiro Adaptado"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt30144839/",
+    "imdbRating": 7.7,
+    "watchLinks": [
+      {
+        "label": "HBO Max",
+        "url": "https://www.hbomax.com/movies/one-battle-after-another/bebe611d-8178-481a-a4f2-de743b5b135a",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Quando seu inimigo ressurge após 16 anos, ex-revolucionários se unem para resgatar a filha de um dos seus. O novo filme de Paul Thomas Anderson inspirado no romance Vineland de Thomas Pynchon.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/one-battle-after-another.svg"
+  },
+  {
+    "id": "frankenstein",
+    "title": "Frankenstein",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 9,
+    "categories": [
+      "Ator (Coadjuvante)",
+      "Fotografia",
+      "Figurino",
+      "Maquiagem e Penteados",
+      "Trilha Sonora Original",
+      "Melhor Filme",
+      "Direção de Arte (Production Design)",
+      "Som",
+      "Roteiro Adaptado"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt1312221/",
+    "imdbRating": 7.4,
+    "watchLinks": [
+      {
+        "label": "Netflix",
+        "url": "https://www.netflix.com/title/81507921",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Guillermo del Toro adapta o clássico de Mary Shelley numa versão épica e gótica com Oscar Isaac como Frankenstein e Jacob Elordi como a Criatura. Exclusivo Netflix.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/frankenstein.svg"
+  },
+  {
+    "id": "marty-supreme",
+    "title": "Marty Supreme",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 9,
+    "categories": [
+      "Ator (Principal)",
+      "Direção de Elenco (Casting)",
+      "Fotografia",
+      "Figurino",
+      "Direção",
+      "Montagem",
+      "Melhor Filme",
+      "Direção de Arte (Production Design)",
+      "Roteiro Original"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt32916440/",
+    "imdbRating": 7.2,
+    "watchLinks": [
+      {
+        "label": "Apple TV | Prime Video",
+        "url": "https://tv.apple.com/us/movie/marty-supreme/umc.cmc.2dzsje8605ufrvacjnxcr0gak",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Marty Mauser, jovem obcecado por pingue-pongue, percorre o inferno atrás de sua grandeza. Josh Safdie dirige Timothée Chalamet em sua terceira indicação ao Oscar.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/marty-supreme.svg"
+  },
+  {
+    "id": "sentimental-value",
+    "title": "Sentimental Value",
+    "type": "Internacional (longa)",
+    "year": 2025,
+    "nominations": 9,
+    "categories": [
+      "Ator (Coadjuvante)",
+      "Atriz (Principal)",
+      "Atriz (Coadjuvante)",
+      "Direção",
+      "Montagem",
+      "Filme Internacional (Noruega)",
+      "Melhor Filme",
+      "Roteiro Original"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt27714581/",
+    "imdbRating": 7.6,
+    "watchLinks": [
+      {
+        "label": "Apple TV",
+        "url": "https://tv.apple.com/us/movie/sentimental-value/umc.cmc.qh7lq4wx36i46l4fwxycwkvz",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Irmãs se reúnem com o pai, um famoso diretor que oferece à atriz Nora um papel no que pode ser seu último filme. Drama norueguês com Renate Reinsve e Stellan Skarsgård.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/sentimental-value.svg"
+  },
+  {
+    "id": "hamnet",
+    "title": "Hamnet",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 8,
+    "categories": [
+      "Atriz (Principal)",
+      "Direção de Elenco (Casting)",
+      "Figurino",
+      "Direção",
+      "Trilha Sonora Original",
+      "Melhor Filme",
+      "Direção de Arte (Production Design)",
+      "Roteiro Adaptado"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt14905854/",
+    "imdbRating": 7.5,
+    "watchLinks": [
+      {
+        "label": "Prime Video",
+        "url": "https://www.amazon.com/Hamnet-Chlo%C3%A9-Zhao/dp/B0G4NB5DGL",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Agnes e William Shakespeare enfrentam o luto pela morte do filho Hamnet, a tragédia que inspirou Hamlet. Chloé Zhao dirige Jessie Buckley e Paul Mescal.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/hamnet.svg"
+  },
+  {
+    "id": "bugonia",
+    "title": "Bugonia",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 4,
+    "categories": [
+      "Atriz (Principal)",
+      "Trilha Sonora Original",
+      "Melhor Filme",
+      "Roteiro Adaptado"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt12300742/",
+    "imdbRating": 6.8,
+    "watchLinks": [
+      {
+        "label": "Peacock",
+        "url": "https://www.peacocktv.com/stream-movies/bugonia",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Yorgos Lanthimos dirige Emma Stone nesta comédia absurda e perturbadora sobre relações de poder e identidade.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/bugonia.svg"
+  },
+  {
+    "id": "f1",
+    "title": "F1",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 4,
+    "categories": [
+      "Montagem",
+      "Melhor Filme",
+      "Som",
+      "Efeitos Visuais"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt16311594/",
+    "imdbRating": 7.1,
+    "watchLinks": [
+      {
+        "label": "Apple TV",
+        "url": "https://tv.apple.com/us/movie/f1-the-movie/umc.cmc.3t6dvnnr87zwd4wmvpdx5came",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Um mecânico aposentado da Fórmula 1 é chamado para guiar um jovem piloto. Joseph Kosinski dirige Brad Pitt em corridas filmadas em circuitos reais durante o Grande Prêmio.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/f1.svg"
+  },
+  {
+    "id": "the-secret-agent",
+    "title": "The Secret Agent",
+    "type": "Internacional (longa)",
+    "year": 2025,
+    "nominations": 4,
+    "categories": [
+      "Ator (Principal)",
+      "Direção de Elenco (Casting)",
+      "Filme Internacional (Brasil)",
+      "Melhor Filme"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt27847051/",
+    "imdbRating": 7.3,
+    "watchLinks": [
+      {
+        "label": "Prime Video",
+        "url": "https://www.amazon.com/Secret-Agent-Kleber-Mendon%C3%A7a-Filho/dp/B0G2TVFP7C",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Brasil, 1977. Um especialista em tecnologia foge de um passado misterioso e retorna a Recife. Thriller político de Kleber Mendonça Filho com Wagner Moura — representante do Brasil no Oscar.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-secret-agent.svg"
+  },
+  {
+    "id": "train-dreams",
+    "title": "Train Dreams",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 4,
+    "categories": [
+      "Fotografia",
+      "Canção Original",
+      "Melhor Filme",
+      "Roteiro Adaptado"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt29768334/",
+    "imdbRating": 7.8,
+    "watchLinks": [
+      {
+        "label": "Netflix",
+        "url": "https://www.netflix.com/title/82020378",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Baseado no conto de Denis Johnson, retrata a vida de Robert Grainier, um trabalhador de estrada de ferro cujos dias se desdobram com beleza inesperada na América do início do século XX.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/train-dreams.svg"
+  },
+  {
+    "id": "avatar-fire-and-ash",
+    "title": "Avatar: Fire and Ash",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 2,
+    "categories": [
+      "Figurino",
+      "Efeitos Visuais"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt1757678/",
+    "imdbRating": 6.5,
+    "watchLinks": [],
+    "availabilityStatus": "unknown",
+    "synopsis": "A terceira aventura de Jake Sully e Neytiri em Pandora. James Cameron expande o universo Na'vi com novos reinos e tribos. Indicado a Efeitos Visuais e Figurino no Oscar 2026.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/avatar-fire-and-ash.svg"
+  },
+  {
+    "id": "blue-moon",
+    "title": "Blue Moon",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 2,
+    "categories": [
+      "Ator (Principal)",
+      "Roteiro Original"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt21373432/",
+    "imdbRating": 7.2,
+    "watchLinks": [
+      {
+        "label": "Netflix",
+        "url": "https://www.netflix.com/title/82053241",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "A história real do compositor Lorenz Hart durante a estreia de Oklahoma!, enquanto lida com alcoolismo e saúde mental. Richard Linklater dirige Ethan Hawke.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/blue-moon.svg"
+  },
+  {
+    "id": "it-was-just-an-accident",
+    "title": "It Was Just an Accident",
+    "type": "Internacional (longa)",
+    "year": 2025,
+    "nominations": 2,
+    "categories": [
+      "Filme Internacional (França)",
+      "Roteiro Original"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt32789244/",
+    "imdbRating": 7.8,
+    "watchLinks": [
+      {
+        "label": "Prime Video",
+        "url": "https://www.amazon.com/Was-Just-Accident-Jafar-Panahi/dp/B0FS2JJCTG",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/it-was-just-an-accident.svg"
+  },
+  {
+    "id": "kpop-demon-hunters",
+    "title": "KPop Demon Hunters",
+    "type": "Animação",
+    "year": 2025,
+    "nominations": 2,
+    "categories": [
+      "Longa de Animação",
+      "Canção Original"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt14205554/",
+    "imdbRating": 7.1,
+    "watchLinks": [
+      {
+        "label": "Netflix",
+        "url": "https://www.netflix.com/title/81498621",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Animação sobre uma grupo de K-pop que secretamente caça demônios. O filme de animação mais popular da Netflix de todos os tempos.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/kpop-demon-hunters.svg"
+  },
+  {
+    "id": "sirat",
+    "title": "Sirāt",
+    "type": "Internacional (longa)",
+    "year": 2025,
+    "nominations": 2,
+    "categories": [
+      "Filme Internacional (Espanha)",
+      "Som"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt32469366/",
+    "imdbRating": 7.6,
+    "watchLinks": [
+      {
+        "label": "Apple TV",
+        "url": "https://tv.apple.com/us/movie/sirat/umc.cmc.4t3cxva0dloeyybv1vf786tzl",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/sirat.svg"
+  },
+  {
+    "id": "a-friend-of-dorothy",
+    "title": "A Friend of Dorothy",
+    "type": "Curta (Live Action)",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-metragem em Live Action"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt35489516/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Disney+",
+        "url": "https://www.disneyplus.com/en-gb/browse/entity-0a7225c7-5643-4278-ae6d-6f33caaea4f2",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/a-friend-of-dorothy.svg"
+  },
+  {
+    "id": "all-the-empty-rooms",
+    "title": "All the Empty Rooms",
+    "type": "Curta-documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-documentário"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt37798645/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Netflix",
+        "url": "https://www.netflix.com/title/82058494",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/all-the-empty-rooms.svg"
+  },
+  {
+    "id": "arco",
+    "title": "Arco",
+    "type": "Animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Longa de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt14883538/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Prime Video",
+        "url": "https://www.amazon.com/Arco-Ugo-Bienvenu/dp/B0G33FK7B8",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/arco.svg"
+  },
+  {
+    "id": "armed-only-with-a-camera-the-life-and-death-of-brent-renaud",
+    "title": "Armed Only with a Camera: The Life and Death of Brent Renaud",
+    "type": "Curta-documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-documentário"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt35515733/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "HBO Max",
+        "url": "https://www.hbomax.com/movies/armed-only-with-a-camera-the-life-and-death-of-brent-renaud/648ab3a1-5e0e-47fd-8234-0c767919c4f7",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/armed-only-with-a-camera-the-life-and-death-of-brent-renaud.svg"
+  },
+  {
+    "id": "butcher-s-stain",
+    "title": "Butcher's Stain",
+    "type": "Curta (Live Action)",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-metragem em Live Action"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt39232815/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Kanopy",
+        "url": "https://www.kanopy.com/en/avalon/video/16259664",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "partial",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/butcher-s-stain.svg"
+  },
+  {
+    "id": "butterfly",
+    "title": "Butterfly",
+    "type": "Curta de animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt30970587/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "ARTE | YouTube (ARTE)",
+        "url": "https://www.arte.tv/en/videos/107847-000-A/butterfly/",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "partial",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/butterfly.svg"
+  },
+  {
+    "id": "children-no-more-were-and-are-gone",
+    "title": "Children No More: \"Were and Are Gone\"",
+    "type": "Curta-documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-documentário"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt38691874/",
+    "imdbRating": null,
+    "watchLinks": [],
+    "availabilityStatus": "unavailable",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/children-no-more-were-and-are-gone.svg"
+  },
+  {
+    "id": "come-see-me-in-the-good-light",
+    "title": "Come See Me in the Good Light",
+    "type": "Documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Documentário (Longa)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt34966013/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Apple TV | Prime Video",
+        "url": "https://tv.apple.com/us/movie/come-see-me-in-the-good-light/umc.cmc.27uh51l7oh3ghql2gxb6xvb1s",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/come-see-me-in-the-good-light.svg"
+  },
+  {
+    "id": "cutting-through-rocks",
+    "title": "Cutting through Rocks",
+    "type": "Documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Documentário (Longa)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt10196414/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Site oficial / vendas",
+        "url": "https://www.gandomproduction.com/cutting-through-rocks",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "unavailable",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/cutting-through-rocks.svg"
+  },
+  {
+    "id": "diane-warren-relentless",
+    "title": "Diane Warren: Relentless",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Canção Original"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt14588692/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Prime Video",
+        "url": "https://www.amazon.com/Diane-Warren-Relentless-Bess-Kargman/dp/B0DTQ9RLT6",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/diane-warren-relentless.svg"
+  },
+  {
+    "id": "elio",
+    "title": "Elio",
+    "type": "Animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Longa de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt14549466/",
+    "imdbRating": 7.0,
+    "watchLinks": [
+      {
+        "label": "Disney+",
+        "url": "https://www.disneyplus.com/browse/entity-367ee1b6-1a50-413a-96f6-655175166f38",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Um menino tímido e obcecado por ficção científica é transportado por acidente para o Comuniverso, uma galáxia intergaláctica, onde é confundido com o representante da Terra.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/elio.svg"
+  },
+  {
+    "id": "forevergreen",
+    "title": "Forevergreen",
+    "type": "Curta de animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt36454323/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "YouTube",
+        "url": "https://www.youtube.com/watch?v=B4EPW7JUMTM",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "partial",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/forevergreen.svg"
+  },
+  {
+    "id": "if-i-had-legs-i-d-kick-you",
+    "title": "If I Had Legs I'd Kick You",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Atriz (Principal)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt28191854/",
+    "imdbRating": 7.0,
+    "watchLinks": [
+      {
+        "label": "HBO Max",
+        "url": "https://www.hbomax.com/movies/if-i-had-legs-id-kick-you/dc9b06eb-1210-4257-a80e-5bddf74900c7",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Enquanto tenta administrar sua vida e carreira, uma mulher à beira de um colapso precisa lidar com a doença da filha, marido ausente e uma relação incomum com seu terapeuta. Rose Byrne é indicada ao Oscar.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/if-i-had-legs-i-d-kick-you.svg"
+  },
+  {
+    "id": "jane-austen-s-period-drama",
+    "title": "Jane Austen's Period Drama",
+    "type": "Curta (Live Action)",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-metragem em Live Action"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt31171760/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Kanopy",
+        "url": "https://www.kanopy.com/en/product/jane-austens-period-drama",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "partial",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/jane-austen-s-period-drama.svg"
+  },
+  {
+    "id": "jurassic-world-rebirth",
+    "title": "Jurassic World Rebirth",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Efeitos Visuais"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt20215234/",
+    "imdbRating": null,
+    "watchLinks": [],
+    "availabilityStatus": "unknown",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/jurassic-world-rebirth.svg"
+  },
+  {
+    "id": "kokuho",
+    "title": "Kokuho",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Maquiagem e Penteados"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt29412650/",
+    "imdbRating": 7.5,
+    "watchLinks": [
+      {
+        "label": "Em cartaz / informações (GKIDS)",
+        "url": "https://gkids.com/films/kokuho/",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "unavailable",
+    "synopsis": "Drama japonês de época sobre a preservação de artes tradicionais. Indicado ao Oscar de Maquiagem e Penteados.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/kokuho.svg"
+  },
+  {
+    "id": "little-amelie-or-the-character-of-rain",
+    "title": "Little Amélie or the Character of Rain",
+    "type": "Animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Longa de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt29313285/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Apple TV | Fandango at Home",
+        "url": "https://tv.apple.com/us/movie/little-amelie-or-the-character-of-rain/umc.cmc.3f50vca0x0oi79bonur26s920",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/little-amelie-or-the-character-of-rain.svg"
+  },
+  {
+    "id": "mr-nobody-against-putin",
+    "title": "Mr. Nobody against Putin",
+    "type": "Documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Documentário (Longa)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt34965515/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Prime Video | Fandango at Home",
+        "url": "https://www.amazon.com/Nobody-Against-Putin-David-Borenstein/dp/B0GHPPYPVF",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/mr-nobody-against-putin.svg"
+  },
+  {
+    "id": "perfectly-a-strangeness",
+    "title": "Perfectly a Strangeness",
+    "type": "Curta-documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-documentário"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt32205767/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Kanopy",
+        "url": "https://www.kanopy.com/en/product/16259666?vp=bluegrasskctcs",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "partial",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/perfectly-a-strangeness.svg"
+  },
+  {
+    "id": "retirement-plan",
+    "title": "Retirement Plan",
+    "type": "Curta de animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt33019507/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Disney+",
+        "url": "https://www.disneyplus.com/en-en/browse/entity-39a43568-5e41-4906-9d4e-694f4c89e750",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/retirement-plan.svg"
+  },
+  {
+    "id": "song-sung-blue",
+    "title": "Song Sung Blue",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Atriz (Principal)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt31762842/",
+    "imdbRating": 7.1,
+    "watchLinks": [],
+    "availabilityStatus": "unknown",
+    "synopsis": "Lightning e Thunder, casal de Milwaukee que imita Neil Diamond, vivem altos e baixos em sua jornada musical. Hugh Jackman e Kate Hudson lideram o elenco.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/song-sung-blue.svg"
+  },
+  {
+    "id": "the-alabama-solution",
+    "title": "The Alabama Solution",
+    "type": "Documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Documentário (Longa)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt35307139/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "HBO Max",
+        "url": "https://www.hbomax.com/movies/alabama-solution/a035980c-668b-4a80-aa01-a92ec58d06cc",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-alabama-solution.svg"
+  },
+  {
+    "id": "the-devil-is-busy",
+    "title": "The Devil Is Busy",
+    "type": "Curta-documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-documentário"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt34205548/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Prime Video (HBO Max channel)",
+        "url": "https://www.amazon.com/Devil-Busy-Geeta-Gandbhir/dp/B0FQK3Z17G",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-devil-is-busy.svg"
+  },
+  {
+    "id": "the-girl-who-cried-pearls",
+    "title": "The Girl Who Cried Pearls",
+    "type": "Curta de animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt36956820/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "NFB.ca",
+        "url": "https://collection.nfb.ca/film/the-girl-who-cried-pearls",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "partial",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-girl-who-cried-pearls.svg"
+  },
+  {
+    "id": "the-lost-bus",
+    "title": "The Lost Bus",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Efeitos Visuais"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt21103218/",
+    "imdbRating": null,
+    "watchLinks": [],
+    "availabilityStatus": "unknown",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-lost-bus.svg"
+  },
+  {
+    "id": "the-perfect-neighbor",
+    "title": "The Perfect Neighbor",
+    "type": "Documentário",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Documentário (Longa)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt28180583/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Netflix",
+        "url": "https://www.netflix.com/title/82018736",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-perfect-neighbor.svg"
+  },
+  {
+    "id": "the-singers",
+    "title": "The Singers",
+    "type": "Curta (Live Action)",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-metragem em Live Action"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt33508491/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Netflix",
+        "url": "https://www.netflix.com/title/82699221",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-singers.svg"
+  },
+  {
+    "id": "the-smashing-machine",
+    "title": "The Smashing Machine",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Maquiagem e Penteados"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt14234330/",
+    "imdbRating": 6.9,
+    "watchLinks": [
+      {
+        "label": "HBO Max",
+        "url": "https://www.hbomax.com/movies/smashing-machine/bdf72d38-d39b-477a-b366-3c873bd31aa5",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Biopic do lutador de MMA Mark Kerr. Kazu Hiro é indicado ao Oscar de Maquiagem e Penteados por sua transformação.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-smashing-machine.svg"
+  },
+  {
+    "id": "the-three-sisters",
+    "title": "The Three Sisters",
+    "type": "Curta de animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt35676079/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Shortverse",
+        "url": "https://www.shortverse.com/films/the-three-sisters",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "partial",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-three-sisters.svg"
+  },
+  {
+    "id": "the-ugly-stepsister",
+    "title": "The Ugly Stepsister",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Maquiagem e Penteados"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt15534512/",
+    "imdbRating": 7.3,
+    "watchLinks": [
+      {
+        "label": "Hulu",
+        "url": "https://www.hulu.com/movie/the-ugly-stepsister-6ca7ef77-9187-43cb-9df0-57158b429bff",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Reinterpretação sombria e visceral do conto de Cinderela, focada na perspectiva da madrasta. Produção norueguesa indicada ao Oscar de Maquiagem e Penteados.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-ugly-stepsister.svg"
+  },
+  {
+    "id": "the-voice-of-hind-rajab",
+    "title": "The Voice of Hind Rajab",
+    "type": "Internacional (longa)",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Filme Internacional (Tunísia)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt36943034/",
+    "imdbRating": null,
+    "watchLinks": [],
+    "availabilityStatus": "unknown",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/the-voice-of-hind-rajab.svg"
+  },
+  {
+    "id": "two-people-exchanging-saliva",
+    "title": "Two People Exchanging Saliva",
+    "type": "Curta (Live Action)",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Curta-metragem em Live Action"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt33365259/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "The New Yorker",
+        "url": "https://www.twopeopleexchangingsaliva.com/watch",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "partial",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/two-people-exchanging-saliva.svg"
+  },
+  {
+    "id": "viva-verdi",
+    "title": "Viva Verdi!",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Canção Original"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt3595454/",
+    "imdbRating": null,
+    "watchLinks": [
+      {
+        "label": "Jolt.Film",
+        "url": "https://jolt.film/watch/vivaverdi",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/viva-verdi.svg"
+  },
+  {
+    "id": "weapons",
+    "title": "Weapons",
+    "type": "Longa",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Atriz (Coadjuvante)"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt32118116/",
+    "imdbRating": 6.7,
+    "watchLinks": [
+      {
+        "label": "HBO Max",
+        "url": "https://www.hbomax.com/movies/weapons/bcbb6e0d-ca89-43e4-a9b1-2fc728145beb",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Drama tenso com múltiplas perspectivas sobre uma série de eventos violentos em uma pequena cidade americana. Amy Madigan recebeu indicação ao Oscar de Atriz Coadjuvante.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/weapons.svg"
+  },
+  {
+    "id": "zootopia-2",
+    "title": "Zootopia 2",
+    "type": "Animação",
+    "year": 2025,
+    "nominations": 1,
+    "categories": [
+      "Longa de Animação"
+    ],
+    "imdbUrl": "https://www.imdb.com/title/tt10823952/",
+    "imdbRating": 7.4,
+    "watchLinks": [
+      {
+        "label": "Apple TV | Prime Video",
+        "url": "https://tv.apple.com/us/movie/zootopia-2/umc.cmc.6qp1q2seteiudk0w59ao7hk5t",
+        "status": "unconfirmed"
+      }
+    ],
+    "availabilityStatus": "available",
+    "synopsis": "Nick e Judy retornam em uma nova aventura na cidade dos animais. Sequência do Oscar-vencedor Zootopia de 2016. O filme de animação mais lucrativo da história de Hollywood.",
+    "trivia": [],
+    "awardsWon": [],
+    "poster": "/assets/covers/zootopia-2.svg"
+  }
+]

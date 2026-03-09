@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#1f0000"/>
+      <stop offset="50%" stop-color="#0f0000"/>
+      <stop offset="100%" stop-color="#0f0000"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#3f0000" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0f0000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="white" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="ts" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.9"/>
+    </filter>
+    <filter id="gf">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+    <clipPath id="clip"><rect width="200" height="300" rx="4"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <!-- Background -->
+    <rect width="200" height="300" fill="url(#bg)"/>
+    <!-- Ambient glow -->
+    <rect width="200" height="300" fill="url(#glow)"/>
+    <!-- Shine overlay -->
+    <rect width="200" height="300" fill="url(#shine)"/>
+
+    <!-- Decorative lines -->
+    <line x1="20" y1="240" x2="180" y2="240" stroke="#cc3333" stroke-opacity="0.3" stroke-width="0.5"/>
+    <line x1="20" y1="244" x2="180" y2="244" stroke="#cc3333" stroke-opacity="0.15" stroke-width="0.5"/>
+
+    <!-- Central icon / letter -->
+    <circle cx="100" cy="110" r="42" fill="#3f0000" fill-opacity="0.12"/>
+    <circle cx="100" cy="110" r="38" fill="none" stroke="#cc3333" stroke-opacity="0.2" stroke-width="1"/>
+    <text x="100" y="126" text-anchor="middle" font-size="48" fill="#cc3333" fill-opacity="0.7" font-weight="700" font-family="Georgia,serif" filter="url(#ts)">B</text>
+
+    <!-- Title lines -->
+    <text x="100" y="186" text-anchor="middle" font-size="18" fill="#ffffff" font-weight="700" font-family="Georgia,serif" filter="url(#ts)">Butcher's</text>
+<text x="100" y="210" text-anchor="middle" font-size="18" fill="#ffffff" font-weight="700" font-family="Georgia,serif" filter="url(#ts)">Stain</text>
+
+
+    <!-- Bottom badge -->
+    <rect x="30" y="262" width="140" height="22" rx="3" fill="#cc3333" fill-opacity="0.15"/>
+    <rect x="30" y="262" width="140" height="22" rx="3" fill="none" stroke="#cc3333" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="100" y="277" text-anchor="middle" font-size="8" fill="#cc3333" fill-opacity="0.9" font-weight="600" letter-spacing="1.5" font-family="Arial,sans-serif">2025 · OSCAR</text>
+
+    <!-- Corner accents -->
+    <polyline points="8,18 8,8 18,8" fill="none" stroke="#cc3333" stroke-opacity="0.4" stroke-width="1.2"/>
+    <polyline points="182,8 192,8 192,18" fill="none" stroke="#cc3333" stroke-opacity="0.4" stroke-width="1.2"/>
+    <polyline points="8,282 8,292 18,292" fill="none" stroke="#cc3333" stroke-opacity="0.4" stroke-width="1.2"/>
+    <polyline points="182,292 192,292 192,282" fill="none" stroke="#cc3333" stroke-opacity="0.4" stroke-width="1.2"/>
+
+    <!-- Border -->
+    <rect x="0" y="0" width="200" height="300" rx="4" fill="none" stroke="#cc3333" stroke-opacity="0.2" stroke-width="1"/>
+  </g>
+</svg>

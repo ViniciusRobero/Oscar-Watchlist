@@ -1,0 +1,22 @@
+{
+  "users": {
+    "testuser": {
+      "passwordHash": null,
+      "films": {},
+      "predictions": {
+        "melhor-filme": "sinners"
+      },
+      "createdAt": "2026-03-02T23:15:55.165Z"
+    },
+    "testuser2": {
+      "passwordHash": null,
+      "films": {},
+      "predictions": {
+        "melhor-filme": "sinners"
+      },
+      "createdAt": "2026-03-02T23:17:31.336Z"
+    }
+  },
+  "officialResults": {},
+  "schemaVersion": 2
+}

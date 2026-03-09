@@ -1,0 +1,116 @@
+const express = require('express');
+const { loadState, saveState, loadCategories, loadFilms } = require('../data/db');
+
+const router = express.Router();
+
+// Helper: resolve a nomineeId → filmId using categories lookup
+function resolveFilmId(cats, categoryId, nomineeId) {
+  if (!nomineeId) return null;
+  const cat = cats.find((c) => c.id === categoryId);
+  if (!cat) return nomineeId; // fallback
+  const nominee = cat.nominees?.find((n) => n.id === nomineeId);
+  return nominee?.filmId || nomineeId; // filmId or fallback to nomineeId
+}
+
+// Set official winner for a category
+// body: { nomineeId } or { filmId } for legacy
+router.patch('/official/:categoryId', (req, res) => {
+  const categoryId = String(req.params.categoryId || '').trim();
+  const nomineeId = req.body?.nomineeId
+    ? String(req.body.nomineeId)
+    : req.body?.filmId
+    ? String(req.body.filmId)
+    : '';
+  const state = loadState();
+  state.officialResults[categoryId] = nomineeId || '';
+  saveState(state);
+  res.json({ ok: true, officialResults: state.officialResults });
+});
+
+// Compare two users' predictions
+router.get('/compare/users', (req, res) => {
+  const leftName = String(req.query.left || '').trim();
+  const rightName = String(req.query.right || '').trim();
+  const cats = loadCategories();
+  const state = loadState();
+  const left = state.users[leftName];
+  const right = state.users[rightName];
+  if (!left || !right) return res.status(404).json({ error: 'Um ou mais usuários não encontrados.' });
+
+  const matches = [];
+  const diffs = [];
+  let compared = 0;
+  for (const cat of cats) {
+    const lNomineeId = left.predictions?.[cat.id] || null;
+    const rNomineeId = right.predictions?.[cat.id] || null;
+    const lFilmId = resolveFilmId(cats, cat.id, lNomineeId);
+    const rFilmId = resolveFilmId(cats, cat.id, rNomineeId);
+    if (lNomineeId || rNomineeId) compared++;
+    if (lNomineeId && rNomineeId && lNomineeId === rNomineeId) {
+      matches.push({
+        categoryId: cat.id,
+        categoryName: cat.name,
+        nomineeId: lNomineeId,
+        filmId: lFilmId,
+        leftFilmId: lFilmId,
+        rightFilmId: rFilmId,
+      });
+    } else {
+      diffs.push({
+        categoryId: cat.id,
+        categoryName: cat.name,
+        leftNomineeId: lNomineeId,
+        rightNomineeId: rNomineeId,
+        leftFilmId: lFilmId,
+        rightFilmId: rFilmId,
+      });
+    }
+  }
+  res.json({
+    totalCategories: cats.length,
+    comparedCategories: compared,
+    matchesCount: matches.length,
+    matches,
+    diffs,
+  });
+});
+
+// Compare user predictions vs official results
+router.get('/compare/official/:username', (req, res) => {
+  const username = String(req.params.username || '').trim();
+  const cats = loadCategories();
+  const state = loadState();
+  const user = state.users[username];
+  if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+
+  let correct = 0;
+  let comparable = 0;
+  const results = cats.map((cat) => {
+    const predictedNomineeId = user.predictions?.[cat.id] || null;
+    const officialNomineeId = state.officialResults?.[cat.id] || null;
+    const predictedFilmId = resolveFilmId(cats, cat.id, predictedNomineeId);
+    const officialFilmId = resolveFilmId(cats, cat.id, officialNomineeId);
+    const isCorrect = !!predictedNomineeId && !!officialNomineeId && predictedNomineeId === officialNomineeId;
+    if (officialNomineeId) comparable++;
+    if (isCorrect) correct++;
+    return {
+      categoryId: cat.id,
+      categoryName: cat.name,
+      predictedNomineeId,
+      officialNomineeId,
+      predictedFilmId,
+      officialFilmId,
+      isCorrect,
+      highlight: cat.highlight || false,
+    };
+  });
+
+  res.json({
+    totalCategories: cats.length,
+    comparableCategories: comparable,
+    correctCount: correct,
+    results,
+  });
+});
+
+module.exports = router;

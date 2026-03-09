@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #07070e;
+    color: #eef0f6;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #07070e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2e2e50;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3a3a66;
+  }
+
+  input, select, textarea {
+    outline: none;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #4b5563;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-bg-surface border border-border rounded-2xl;
+  }
+
+  .card-raised {
+    @apply bg-bg-raised border border-border rounded-2xl;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-bg-raised text-sm font-semibold text-gray-200 cursor-pointer transition-all duration-150 hover:bg-bg-hover hover:border-border-active disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-gold {
+    @apply bg-gold text-bg-base border-gold-dim hover:bg-yellow-400 hover:border-yellow-500;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent border-transparent hover:bg-bg-hover;
+  }
+
+  .btn-danger {
+    @apply border-red-900 bg-red-950 text-red-400 hover:bg-red-900;
+  }
+
+  .input {
+    @apply w-full px-3.5 py-2.5 rounded-xl border border-border bg-bg-base text-gray-200 text-sm transition-colors focus:border-accent focus:ring-1 focus:ring-accent/20;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border;
+  }
+
+  .badge-gold {
+    @apply bg-gold-muted text-gold border-gold-dim;
+  }
+
+  .badge-neutral {
+    @apply bg-bg-raised text-gray-400 border-border;
+  }
+
+  .badge-success {
+    @apply bg-emerald-950 text-success border-emerald-800;
+  }
+
+  .badge-danger {
+    @apply bg-red-950 text-danger border-red-800;
+  }
+
+  .badge-accent {
+    @apply bg-indigo-950 text-indigo-300 border-indigo-800;
+  }
+
+  .nav-tab {
+    @apply px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 transition-all duration-150 cursor-pointer hover:text-gray-300 hover:bg-bg-raised;
+  }
+
+  .nav-tab-active {
+    @apply bg-bg-raised text-gray-100 border border-border;
+  }
+
+  .section-title {
+    @apply font-display text-xl text-gray-100 mb-1;
+  }
+
+  .meta-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-gray-500;
+  }
+}
+
+/* Film poster shimmer placeholder */
+.poster-placeholder {
+  background: linear-gradient(135deg, #141427 0%, #1a1a30 50%, #141427 100%);
+  background-size: 200% 200%;
+  animation: shimmer 2s ease infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Star rating */
+.star-btn {
+  transition: transform 0.1s ease;
+}
+.star-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Prediction button states */
+.nominee-card {
+  @apply w-full text-left px-4 py-3 rounded-xl border border-border bg-bg-raised text-sm font-medium text-gray-300 cursor-pointer transition-all duration-150 hover:border-border-active hover:bg-bg-hover;
+}
+
+.nominee-card-selected {
+  @apply border-gold-dim bg-gold-muted text-gold;
+}
+
+.nominee-card-winner {
+  @apply border-emerald-700 bg-emerald-950 text-emerald-300;
+}
+
+.nominee-card-correct {
+  @apply ring-2 ring-success;
+}
+
+.nominee-card-wrong {
+  @apply ring-2 ring-danger opacity-60;
+}
