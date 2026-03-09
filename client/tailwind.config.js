@@ -31,6 +31,11 @@ export default {
         '2xl': '1rem',
         '3xl': '1.25rem',
       },
+      boxShadow: {
+        'glow': '0 0 20px rgba(99, 102, 241, 0.15)',
+        'glow-gold': '0 0 20px rgba(245, 197, 24, 0.15)',
+        'glass': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
+      },
     },
   },
   plugins: [],

@@ -41,15 +41,15 @@
 
 @layer components {
   .card {
-    @apply bg-bg-surface border border-border rounded-2xl;
+    @apply bg-bg-surface/80 backdrop-blur-md border border-border shadow-glass rounded-2xl;
   }
 
   .card-raised {
-    @apply bg-bg-raised border border-border rounded-2xl;
+    @apply bg-bg-raised/90 backdrop-blur-md border border-border shadow-glass rounded-2xl;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-bg-raised text-sm font-semibold text-gray-200 cursor-pointer transition-all duration-150 hover:bg-bg-hover hover:border-border-active disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border/50 bg-bg-raised/80 backdrop-blur-sm shadow-glass text-sm font-semibold text-gray-200 cursor-pointer transition-all duration-300 hover:bg-bg-hover hover:border-border-active hover:shadow-glow disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
   .btn-gold {

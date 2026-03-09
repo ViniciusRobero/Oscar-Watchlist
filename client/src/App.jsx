@@ -8,6 +8,8 @@ import { PredictionsPage } from './pages/PredictionsPage.jsx';
 import { OscarNightPage } from './pages/OscarNightPage.jsx';
 import { ComparePage } from './pages/ComparePage.jsx';
 import { Trophy } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SkeletonFilmCard } from './components/SkeletonFilmCard.jsx';
 
 function AppInner() {
   const { state, bootstrap } = useApp();
@@ -25,17 +27,6 @@ function AppInner() {
       localStorage.setItem('oscar_active_user', state.activeUser);
     }
   }, [state.activeUser]);
-
-  if (state.loading) {
-    return (
-      <div className="min-h-screen bg-bg-base flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Trophy className="w-10 h-10 text-gold animate-pulse" />
-          <p className="text-gray-500 text-sm">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (state.error) {
     return (
@@ -62,7 +53,31 @@ function AppInner() {
   return (
     <>
       <Layout activePage={activePage} onChangePage={setActivePage}>
-        {pages[activePage] || <WatchlistPage />}
+        <AnimatePresence mode="wait">
+          {state.loading ? (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+            >
+              {Array.from({ length: 12 }).map((_, i) => (
+                <SkeletonFilmCard key={i} />
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              key={activePage}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3 }}
+            >
+              {pages[activePage] || <WatchlistPage />}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Layout>
       <Toast />
     </>

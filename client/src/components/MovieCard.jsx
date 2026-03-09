@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Star, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
+import { motion } from 'framer-motion';
 
 const availColors = {
   available: 'text-emerald-400',
@@ -50,7 +51,7 @@ export function MovieCard({ film, onOpen }) {
 
   const predCats = state.categories.filter(
     (c) => state.profile.predictions?.[c.id] === film.id ||
-           c.nominees?.some(n => n.id === state.profile.predictions?.[c.id] && n.filmId === film.id)
+      c.nominees?.some(n => n.id === state.profile.predictions?.[c.id] && n.filmId === film.id)
   ).length;
 
   async function toggleWatched(e) {
@@ -64,11 +65,12 @@ export function MovieCard({ film, onOpen }) {
   }
 
   return (
-    <article
+    <motion.article
+      whileHover={{ y: -4, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => onOpen(film)}
-      className={`card flex gap-3.5 p-3.5 cursor-pointer group transition-all duration-150 hover:border-border-active hover:shadow-xl hover:shadow-black/30 ${
-        fs.watched ? 'opacity-60' : ''
-      }`}
+      className={`card flex gap-3.5 p-3.5 cursor-pointer group transition-all duration-300 hover:shadow-glow hover:border-accent/40 ${fs.watched ? 'opacity-60' : ''
+        }`}
     >
       {/* Poster */}
       <div className="shrink-0 w-[68px] h-[100px] rounded-lg overflow-hidden border border-border bg-bg-raised flex items-center justify-center">
@@ -130,11 +132,10 @@ export function MovieCard({ film, onOpen }) {
 
           <button
             onClick={toggleWatched}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-150 ${
-              fs.watched
-                ? 'bg-emerald-950 border-emerald-800 text-success'
-                : 'bg-bg-raised border-border text-gray-600 hover:border-border-active hover:text-gray-400'
-            }`}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-150 ${fs.watched
+              ? 'bg-emerald-950 border-emerald-800 text-success'
+              : 'bg-bg-raised border-border text-gray-600 hover:border-border-active hover:text-gray-400'
+              }`}
           >
             {fs.watched ? (
               <><Eye className="w-3 h-3" /> Assistido</>
@@ -144,6 +145,6 @@ export function MovieCard({ film, onOpen }) {
           </button>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }

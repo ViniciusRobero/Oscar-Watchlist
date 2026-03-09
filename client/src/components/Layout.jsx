@@ -189,26 +189,31 @@ export function Layout({ activePage, onChangePage, children }) {
           </div>
         </div>
 
-        {/* Mobile nav */}
-        <div className="md:hidden border-t border-border overflow-x-auto scrollbar-none">
-          <div className="flex items-center gap-1 px-3 py-2 min-w-max">
-            {NAV_ITEMS.map(({ id, label, Icon }) => (
-              <button
-                key={id}
-                onClick={() => onChangePage(id)}
-                className={`nav-tab flex items-center gap-1.5 text-xs py-1.5 px-3 whitespace-nowrap ${activePage === id ? 'nav-tab-active' : ''
-                  }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
-              </button>
-            ))}
+        {/* Mobile nav (Bottom Bar) */}
+        <nav className="sm:hidden fixed bottom-0 w-full z-50 bg-bg-base/90 backdrop-blur-xl border-t border-white/5 pb-safe">
+          <div className="flex justify-around items-center px-2 py-2">
+            {NAV_ITEMS.map(({ id, label, Icon }) => {
+              const isActive = activePage === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => onChangePage(id)}
+                  className={`flex flex-col items-center justify-center w-16 h-12 rounded-xl transition-all duration-200 ${isActive ? 'text-gold' : 'text-gray-500 hover:text-gray-300'
+                    }`}
+                >
+                  <Icon className={`w-5 h-5 mb-1 ${isActive ? 'scale-110 drop-shadow-glow-gold' : ''}`} />
+                  <span className={`text-[10px] font-medium ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        </div>
+        </nav>
       </header>
 
       {/* Page content */}
-      <main className="max-w-5xl mx-auto px-4 py-6">
+      <main className="max-w-5xl mx-auto px-4 py-6 sm:pb-6 pb-24">
         {children}
       </main>
     </div>

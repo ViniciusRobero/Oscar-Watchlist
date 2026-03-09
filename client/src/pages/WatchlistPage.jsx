@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Search, SlidersHorizontal, X, Film } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext.jsx';
 import { MovieCard } from '../components/MovieCard.jsx';
 import { MovieModal } from '../components/MovieModal.jsx';
@@ -94,11 +95,10 @@ export function WatchlistPage() {
               <button
                 key={f.id}
                 onClick={() => setFilter(f.id)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-100 ${
-                  filter === f.id
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-100 ${filter === f.id
                     ? 'bg-bg-raised text-gray-100 border border-border'
                     : 'text-gray-500 hover:text-gray-300'
-                }`}
+                  }`}
               >
                 {f.label}
               </button>
@@ -134,9 +134,11 @@ export function WatchlistPage() {
         </div>
       )}
 
-      {selectedFilm && (
-        <MovieModal film={selectedFilm} onClose={() => setSelectedFilm(null)} />
-      )}
+      <AnimatePresence>
+        {selectedFilm && (
+          <MovieModal film={selectedFilm} onClose={() => setSelectedFilm(null)} />
+        )}
+      </AnimatePresence>
     </>
   );
 }
