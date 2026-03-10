@@ -1,3 +1,5 @@
+require('dotenv').config();
+const { createClient } = require('@libsql/client');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -6,12 +8,16 @@ const DATA_DIR = path.join(__dirname);
 const EDITIONS_DIR = path.join(DATA_DIR, 'editions');
 const EDITIONS_PATH = path.join(DATA_DIR, 'editions.json');
 
-// Legacy paths (kept as fallback)
+// Legacy paths (kept as fallback for static config data)
 const LEGACY_FILMS_PATH = path.join(DATA_DIR, 'films.json');
 const LEGACY_CATEGORIES_PATH = path.join(DATA_DIR, 'categories.json');
-const LEGACY_STATE_PATH = path.join(DATA_DIR, 'state.json');
 
-const SCHEMA_VERSION = 2;
+// ── Database Client ─────────────────────────────────────────────────────────
+
+const url = process.env.TURSO_URL || 'file:data/local.db';
+const authToken = process.env.TURSO_AUTH_TOKEN;
+
+const dbClient = createClient({ url, authToken });
 
 // ── Editions ────────────────────────────────────────────────────────────────
 
@@ -55,7 +61,7 @@ function verifyPassword(password, stored) {
   }
 }
 
-// ── JSON helpers ────────────────────────────────────────────────────────────
+// ── JSON helpers (static config only) ───────────────────────────────────────
 
 function readJson(filePath, fallback) {
   try {
@@ -66,17 +72,10 @@ function readJson(filePath, fallback) {
   }
 }
 
-function writeJson(filePath, value) {
-  fs.writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');
-}
-
-// ── Data loaders (edition-aware) ────────────────────────────────────────────
-
 function loadFilms(editionId) {
   const eid = resolveEdition(editionId);
   const edPath = path.join(editionDir(eid), 'films.json');
   if (fs.existsSync(edPath)) return readJson(edPath, []);
-  // Fallback to legacy
   return readJson(LEGACY_FILMS_PATH, []);
 }
 
@@ -87,115 +86,294 @@ function loadCategories(editionId) {
   return readJson(LEGACY_CATEGORIES_PATH, []);
 }
 
-function loadState(editionId) {
-  const eid = resolveEdition(editionId);
-  const defaults = { schemaVersion: SCHEMA_VERSION, users: {}, officialResults: {} };
-  const edPath = path.join(editionDir(eid), 'state.json');
-  const state = fs.existsSync(edPath) ? readJson(edPath, defaults) : readJson(LEGACY_STATE_PATH, defaults);
-  if (!state.schemaVersion) state.schemaVersion = SCHEMA_VERSION;
-  if (!state.officialResults) state.officialResults = {};
-  if (!state.users) state.users = {};
-  return state;
+// ── Turso DB Async Layers ───────────────────────────────────────────────────
+
+async function getUser(username) {
+  const rs = await dbClient.execute({
+    sql: "SELECT * FROM users WHERE username = ?",
+    args: [String(username).trim()]
+  });
+  if (rs.rows.length === 0) return null;
+  const row = rs.rows[0];
+  return {
+    id: row.id,
+    username: row.username,
+    email: row.email,
+    passwordHash: row.password_hash,
+    role: row.role,
+    createdAt: row.created_at
+  };
 }
 
-function saveState(state, editionId) {
-  const eid = resolveEdition(editionId);
-  state.schemaVersion = SCHEMA_VERSION;
-  const dir = editionDir(eid);
-  fs.mkdirSync(dir, { recursive: true });
-  writeJson(path.join(dir, 'state.json'), state);
+async function createUser(username, passwordHash, role = 'user') {
+  const id = String(username).trim(); // for simplicity in this project (or UUID)
+  const uname = String(username).trim();
+  await dbClient.execute({
+    sql: "INSERT INTO users (id, username, password_hash, role) VALUES (?, ?, ?, ?)",
+    args: [id, uname, passwordHash, role]
+  });
+  return await getUser(uname);
 }
 
-function saveFilms(films, editionId) {
-  const eid = resolveEdition(editionId);
-  const dir = editionDir(eid);
-  fs.mkdirSync(dir, { recursive: true });
-  writeJson(path.join(dir, 'films.json'), films);
-}
-
-// ── User helpers ────────────────────────────────────────────────────────────
-
-function ensureUser(state, username, passwordHash = null) {
-  const key = String(username || '').trim();
-  if (!key) return null;
-  if (!state.users[key]) {
-    state.users[key] = {
-      passwordHash,
-      films: {},
-      predictions: {},
-      createdAt: new Date().toISOString(),
-    };
-  } else if (passwordHash && !state.users[key].passwordHash) {
-    state.users[key].passwordHash = passwordHash;
-  }
-  return state.users[key];
-}
-
-function normalizeFilmState(user, filmId) {
-  if (!user.films[filmId]) {
-    user.films[filmId] = { watched: false, personalRating: null, personalNotes: '' };
-  }
-  return user.films[filmId];
-}
-
-function summarizeUsers(state) {
-  return Object.keys(state.users)
-    .sort((a, b) => a.localeCompare(b))
-    .map((username) => {
-      const user = state.users[username] || { films: {}, predictions: {} };
-      const filmEntries = Object.values(user.films || {});
-      const watchedCount = filmEntries.filter((f) => f && f.watched).length;
-      const ratings = filmEntries
-        .map((f) => Number(f && f.personalRating))
-        .filter((n) => Number.isFinite(n) && n > 0);
-      const predictionsCount = Object.values(user.predictions || {}).filter(Boolean).length;
-      return {
-        username,
-        watchedCount,
-        predictionsCount,
-        ratingsCount: ratings.length,
-        averageRating: ratings.length
-          ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
-          : null,
-        createdAt: user.createdAt || null,
-      };
+// Ensure wrapper mimicking old behavior but Async
+async function ensureUserAsync(username, passwordHash = null) {
+  let user = await getUser(username);
+  if (!user) {
+    user = await createUser(username, passwordHash);
+  } else if (passwordHash && !user.passwordHash) {
+    await dbClient.execute({
+      sql: "UPDATE users SET password_hash = ? WHERE id = ?",
+      args: [passwordHash, user.id]
     });
+    user.passwordHash = passwordHash;
+  }
+  return user;
 }
 
-function buildBootstrap(username, editionId) {
+// ── Film States ─────────────────────────────────────────────────────────────
+
+async function getFilmState(userId, filmId, editionId) {
+  const eid = resolveEdition(editionId);
+  const rs = await dbClient.execute({
+    sql: "SELECT * FROM user_film_states WHERE user_id = ? AND film_id = ? AND edition_id = ?",
+    args: [userId, filmId, eid]
+  });
+  if (rs.rows.length === 0) return { watched: false, personalRating: null, personalNotes: '' };
+  const row = rs.rows[0];
+  return {
+    watched: Boolean(row.watched),
+    personalRating: row.personal_rating,
+    personalNotes: row.personal_notes || ''
+  };
+}
+
+async function updateFilmState(userId, filmId, editionId, updates) {
+  const eid = resolveEdition(editionId);
+  const current = await getFilmState(userId, filmId, eid);
+  const watched = updates.watched !== undefined ? (updates.watched ? 1 : 0) : (current.watched ? 1 : 0);
+  const personalRating = updates.personalRating !== undefined ? updates.personalRating : current.personalRating;
+  const personalNotes = updates.personalNotes !== undefined ? updates.personalNotes : current.personalNotes;
+
+  const recId = `${userId}_${filmId}_${eid}`;
+
+  await dbClient.execute({
+    sql: `INSERT INTO user_film_states (id, user_id, film_id, edition_id, watched, personal_rating, personal_notes)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(user_id, film_id, edition_id) DO UPDATE SET 
+            watched = excluded.watched,
+            personal_rating = excluded.personal_rating,
+            personal_notes = excluded.personal_notes,
+            updated_at = CURRENT_TIMESTAMP`,
+    args: [recId, userId, filmId, eid, watched, personalRating, personalNotes]
+  });
+
+  return { watched: Boolean(watched), personalRating, personalNotes };
+}
+
+async function getUserFilmsMap(userId, editionId) {
+  const eid = resolveEdition(editionId);
+  const rs = await dbClient.execute({
+    sql: "SELECT film_id, watched, personal_rating, personal_notes FROM user_film_states WHERE user_id = ? AND edition_id = ?",
+    args: [userId, eid]
+  });
+  const map = {};
+  for (const row of rs.rows) {
+    map[row.film_id] = {
+      watched: Boolean(row.watched),
+      personalRating: row.personal_rating,
+      personalNotes: row.personal_notes || ''
+    };
+  }
+  return map;
+}
+
+// ── Predictions ─────────────────────────────────────────────────────────────
+
+async function getPredictionsMap(userId, editionId) {
+  const eid = resolveEdition(editionId);
+  const rs = await dbClient.execute({
+    sql: "SELECT category_id, nominee_id FROM user_predictions WHERE user_id = ? AND edition_id = ?",
+    args: [userId, eid]
+  });
+  const map = {};
+  for (const row of rs.rows) {
+    map[row.category_id] = row.nominee_id;
+  }
+  return map;
+}
+
+async function updatePrediction(userId, categoryId, editionId, nomineeId) {
+  const eid = resolveEdition(editionId);
+  const recId = `${userId}_${categoryId}_${eid}`;
+
+  if (nomineeId === null || nomineeId === undefined) {
+    await dbClient.execute({
+      sql: "DELETE FROM user_predictions WHERE user_id = ? AND category_id = ? AND edition_id = ?",
+      args: [userId, categoryId, eid]
+    });
+  } else {
+    await dbClient.execute({
+      sql: `INSERT INTO user_predictions (id, user_id, category_id, edition_id, nominee_id)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id, category_id, edition_id) DO UPDATE SET 
+              nominee_id = excluded.nominee_id,
+              updated_at = CURRENT_TIMESTAMP`,
+      args: [recId, userId, categoryId, eid, nomineeId]
+    });
+  }
+}
+
+// ── Official Results ────────────────────────────────────────────────────────
+
+async function getOfficialResults(editionId) {
+  const eid = resolveEdition(editionId);
+  const rs = await dbClient.execute({
+    sql: "SELECT category_id, winner_nominee_id FROM official_results WHERE edition_id = ?",
+    args: [eid]
+  });
+  const map = {};
+  for (const row of rs.rows) {
+    map[row.category_id] = row.winner_nominee_id;
+  }
+  return map;
+}
+
+async function updateOfficialResult(categoryId, editionId, winnerNomineeId) {
+  const eid = resolveEdition(editionId);
+  const recId = `official_${categoryId}_${eid}`;
+
+  if (winnerNomineeId === null || winnerNomineeId === undefined) {
+    await dbClient.execute({
+      sql: "DELETE FROM official_results WHERE category_id = ? AND edition_id = ?",
+      args: [categoryId, eid]
+    });
+  } else {
+    await dbClient.execute({
+      sql: `INSERT INTO official_results (id, category_id, edition_id, winner_nominee_id)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(category_id, edition_id) DO UPDATE SET 
+              winner_nominee_id = excluded.winner_nominee_id,
+              updated_at = CURRENT_TIMESTAMP`,
+      args: [recId, categoryId, eid, winnerNomineeId]
+    });
+  }
+}
+
+// ── Refresh Tokens ──────────────────────────────────────────────────────────
+
+async function getRefreshToken(tokenHash) {
+  const rs = await dbClient.execute({
+    sql: "SELECT * FROM refresh_tokens WHERE token_hash = ?",
+    args: [tokenHash]
+  });
+  if (rs.rows.length === 0) return null;
+  return rs.rows[0];
+}
+
+async function storeRefreshToken(id, userId, tokenHash, expiresAt) {
+  await dbClient.execute({
+    sql: "INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)",
+    args: [id, userId, tokenHash, expiresAt.toISOString()]
+  });
+}
+
+async function revokeRefreshToken(tokenHash) {
+  await dbClient.execute({
+    sql: "UPDATE refresh_tokens SET revoked = 1 WHERE token_hash = ?",
+    args: [tokenHash]
+  });
+}
+
+// ── Summaries & Bootstrap ──────────────────────────────────────────────────
+
+async function summarizeUsers(editionId) {
+  const eid = resolveEdition(editionId);
+  const usersRs = await dbClient.execute("SELECT id, username, created_at FROM users");
+  const users = usersRs.rows;
+
+  const summaries = [];
+  for (const u of users) {
+    const films = await getUserFilmsMap(u.id, eid);
+    const predictions = await getPredictionsMap(u.id, eid);
+
+    const filmEntries = Object.values(films || {});
+    const watchedCount = filmEntries.filter((f) => f && f.watched).length;
+    const ratings = filmEntries
+      .map((f) => Number(f && f.personalRating))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    const predictionsCount = Object.keys(predictions || {}).length;
+
+    summaries.push({
+      username: u.username,
+      watchedCount,
+      predictionsCount,
+      ratingsCount: ratings.length,
+      averageRating: ratings.length
+        ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+        : null,
+      createdAt: u.created_at || null,
+    });
+  }
+
+  return summaries.sort((a, b) => a.username.localeCompare(b.username));
+}
+
+async function buildBootstrapAsync(username, editionId) {
   const eid = resolveEdition(editionId);
   const films = loadFilms(eid);
   const categories = loadCategories(eid);
-  const state = loadState(eid);
   const editions = loadEditions();
-  const user = ensureUser(state, username || '');
-  if (user) saveState(state, eid);
+
+  let profile = { films: {}, predictions: {} };
+  const user = await getUser(username);
+  if (user) {
+    profile.films = await getUserFilmsMap(user.id, eid);
+    profile.predictions = await getPredictionsMap(user.id, eid);
+  }
+
+  const summaries = await summarizeUsers(eid);
+  const usersList = summaries.map(s => s.username);
+
+  const officialResults = await getOfficialResults(eid);
+
   return {
     edition: eid,
     editions,
     films,
     categories,
-    users: Object.keys(state.users).sort((a, b) => a.localeCompare(b)),
-    userSummaries: summarizeUsers(state),
+    users: usersList,
+    userSummaries: summaries,
     activeUser: username || '',
-    profile: user || { films: {}, predictions: {} },
-    officialResults: state.officialResults || {},
+    profile,
+    officialResults,
   };
 }
 
 module.exports = {
+  dbClient,
   loadEditions,
   getCurrentEditionId,
   resolveEdition,
   loadFilms,
   loadCategories,
-  loadState,
-  saveState,
-  saveFilms,
-  ensureUser,
-  normalizeFilmState,
-  summarizeUsers,
-  buildBootstrap,
   hashPassword,
   verifyPassword,
+
+  // Async Turso Exports
+  getUser,
+  createUser,
+  ensureUserAsync,
+  getFilmState,
+  updateFilmState,
+  getPredictionsMap,
+  updatePrediction,
+  getOfficialResults,
+  updateOfficialResult,
+  summarizeUsers,
+  buildBootstrapAsync,
+
+  // Async token management
+  getRefreshToken,
+  storeRefreshToken,
+  revokeRefreshToken
 };

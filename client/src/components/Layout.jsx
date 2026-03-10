@@ -231,7 +231,7 @@ export function Layout({ activePage, onChangePage, children }) {
         </div>
 
         {/* Mobile nav (Bottom Bar) */}
-        <nav className="sm:hidden fixed bottom-0 w-full z-50 bg-bg-base/90 backdrop-blur-xl border-t border-white/5 pb-safe">
+        <nav className="md:hidden fixed bottom-0 w-full z-50 bg-bg-base/90 backdrop-blur-xl border-t border-white/5 pb-safe">
           <div className="flex justify-around items-center px-2 py-2">
             {NAV_ITEMS.map(({ id, label, Icon }) => {
               const isActive = activePage === id;
@@ -239,11 +239,11 @@ export function Layout({ activePage, onChangePage, children }) {
                 <button
                   key={id}
                   onClick={() => onChangePage(id)}
-                  className={`flex flex-col items-center justify-center w-16 h-12 rounded-xl transition-all duration-200 ${isActive ? 'text-gold' : 'text-gray-500 hover:text-gray-300'
+                  className={`flex flex-col flex-1 min-w-0 items-center justify-center h-12 rounded-xl transition-all duration-200 ${isActive ? 'text-gold' : 'text-gray-500 hover:text-gray-300'
                     }`}
                 >
-                  <Icon className={`w-5 h-5 mb-1 ${isActive ? 'scale-110 drop-shadow-glow-gold' : ''}`} />
-                  <span className={`text-[10px] font-medium ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+                  <Icon className={`w-5 h-5 mb-1 shrink-0 ${isActive ? 'scale-110 drop-shadow-glow-gold' : ''}`} />
+                  <span className={`text-[9px] font-medium truncate w-full text-center px-0.5 ${isActive ? 'opacity-100' : 'opacity-70'}`}>
                     {label}
                   </span>
                 </button>

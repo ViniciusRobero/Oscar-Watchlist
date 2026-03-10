@@ -1,32 +1,15 @@
-/**
- * JWT Authentication & Authorization Middleware
- *
- * Exports:
- *   authenticate   — Requires a valid JWT. Populates req.user.
- *   optionalAuth   — Populates req.user if a valid token is present, but doesn't block.
- *   requireAdmin   — Must be used AFTER authenticate. Requires role === 'admin'.
- *   generateTokens — Creates { accessToken, refreshToken } for a user.
- *   verifyRefresh   — Verifies a refresh token string; returns payload or null.
- */
-
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { getRefreshToken, storeRefreshToken, revokeRefreshToken } = require('../data/db');
 
-// ── Secrets ──────────────────────────────────────────────────────────────────
-// In production, set JWT_SECRET and JWT_REFRESH_SECRET via env vars.
 const JWT_SECRET = process.env.JWT_SECRET || 'oscar-watchlist-dev-secret-change-me';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'oscar-watchlist-refresh-dev-secret';
 
 const ACCESS_TOKEN_EXPIRY = '15m';
-const REFRESH_TOKEN_EXPIRY = '7d';
+const REFRESH_TOKEN_EXPIRY = '7d'; // used by jwt.sign, string format
 
-// ── In-memory revocation set (replaced by DB in Turso phase) ─────────────────
-// Stores SHA-256 hashes of revoked refresh tokens
-const revokedTokens = new Set();
-
-// ── Token Generation ─────────────────────────────────────────────────────────
-
-function generateTokens(user) {
+// Return tokens and store refresh in DB
+async function generateTokensAsync(user) {
     const payload = {
         id: user.id || user.username,
         username: user.username,
@@ -44,10 +27,14 @@ function generateTokens(user) {
         issuer: 'oscar-watchlist',
     });
 
+    const hash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days approximation
+    const tokenId = `${user.username}_${Date.now()}`;
+
+    await storeRefreshToken(tokenId, user.username, hash, expiresAt);
+
     return { accessToken, refreshToken };
 }
-
-// ── Token Verification ───────────────────────────────────────────────────────
 
 function verifyAccess(token) {
     try {
@@ -57,24 +44,25 @@ function verifyAccess(token) {
     }
 }
 
-function verifyRefresh(token) {
+async function verifyRefreshAsync(token) {
     try {
-        const hash = crypto.createHash('sha256').update(token).digest('hex');
-        if (revokedTokens.has(hash)) return null;
         const payload = jwt.verify(token, JWT_REFRESH_SECRET, { issuer: 'oscar-watchlist' });
         if (payload.type !== 'refresh') return null;
+
+        const hash = crypto.createHash('sha256').update(token).digest('hex');
+        const dbToken = await getRefreshToken(hash);
+        if (!dbToken || dbToken.revoked) return null;
+
         return payload;
     } catch {
         return null;
     }
 }
 
-function revokeRefreshToken(token) {
+async function revokeRefreshTokenAsync(token) {
     const hash = crypto.createHash('sha256').update(token).digest('hex');
-    revokedTokens.add(hash);
+    await revokeRefreshToken(hash);
 }
-
-// ── Express Middleware ────────────────────────────────────────────────────────
 
 function extractToken(req) {
     const authHeader = req.headers.authorization;
@@ -84,10 +72,6 @@ function extractToken(req) {
     return null;
 }
 
-/**
- * authenticate — Requires a valid access token.
- * Sets req.user = { id, username, role }.
- */
 function authenticate(req, res, next) {
     const token = extractToken(req);
     if (!token) {
@@ -103,9 +87,6 @@ function authenticate(req, res, next) {
     next();
 }
 
-/**
- * optionalAuth — Populates req.user if a valid token exists, but doesn't block.
- */
 function optionalAuth(req, _res, next) {
     const token = extractToken(req);
     if (token) {
@@ -115,10 +96,6 @@ function optionalAuth(req, _res, next) {
     next();
 }
 
-/**
- * requireAdmin — Must be used AFTER authenticate.
- * Blocks requests from non-admin users.
- */
 function requireAdmin(req, res, next) {
     if (!req.user || req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Acesso restrito a administradores.' });
@@ -126,10 +103,6 @@ function requireAdmin(req, res, next) {
     next();
 }
 
-/**
- * requireSameUserOrAdmin — Blocks requests where the authenticated user
- * doesn't match the :username param (unless admin).
- */
 function requireSameUserOrAdmin(req, res, next) {
     const paramUser = req.params.username;
     if (!req.user) {
@@ -141,11 +114,25 @@ function requireSameUserOrAdmin(req, res, next) {
     next();
 }
 
+// Temporary synchronous fallback for tests that manually construct tokens
+function generateTokens(user) {
+    const payload = {
+        id: user.id || user.username,
+        username: user.username,
+        role: user.role || 'user',
+    };
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY, issuer: 'oscar-watchlist' });
+    const refreshPayload = { ...payload, type: 'refresh' };
+    const refreshToken = jwt.sign(refreshPayload, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY, issuer: 'oscar-watchlist' });
+    return { accessToken, refreshToken };
+}
+
 module.exports = {
+    generateTokensAsync,
     generateTokens,
     verifyAccess,
-    verifyRefresh,
-    revokeRefreshToken,
+    verifyRefreshAsync,
+    revokeRefreshTokenAsync,
     authenticate,
     optionalAuth,
     requireAdmin,

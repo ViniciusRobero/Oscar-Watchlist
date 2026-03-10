@@ -1,0 +1,107 @@
+const fs = require('fs');
+const path = require('path');
+const request = require('supertest');
+
+// Redirect DB to a test file before requiring the app
+process.env.TURSO_URL = `file:${path.join(__dirname, '..', 'data', 'test_api.db')}`;
+const app = require('../server');
+const db = require('../data/db');
+const { generateTokens } = require('../middleware/auth');
+
+const TEST_EDITION = '__test_api__';
+const TEST_DIR = path.join(__dirname, '..', 'data', 'editions', TEST_EDITION);
+
+let userToken = '';
+let adminToken = '';
+
+beforeAll(async () => {
+    fs.mkdirSync(TEST_DIR, { recursive: true });
+    fs.writeFileSync(path.join(TEST_DIR, 'films.json'), JSON.stringify([
+        { id: 'film1', title: 'Film 1', poster: '/test.jpg' },
+        { id: 'film2', title: 'Film 2', poster: '/test2.jpg' }
+    ]));
+    fs.writeFileSync(path.join(TEST_DIR, 'categories.json'), JSON.stringify([
+        { id: 'cat1', name: 'Cat 1', nominees: [{ id: 'nom1', filmId: 'film1' }, { id: 'nom2', filmId: 'film2' }] }
+    ]));
+
+    // Initialize DB schema for test DB
+    const schemaSql = fs.readFileSync(path.join(__dirname, '..', 'data', 'schema.sql'), 'utf8');
+    await db.dbClient.executeMultiple(schemaSql);
+
+    await db.dbClient.executeMultiple(`
+    DELETE FROM user_predictions;
+    DELETE FROM user_film_states;
+    DELETE FROM refresh_tokens;
+    DELETE FROM official_results;
+    DELETE FROM users;
+  `);
+
+    await db.createUser('api_user', db.hashPassword('123456'), 'user');
+    await db.createUser('api_admin', db.hashPassword('123456'), 'admin');
+
+    userToken = generateTokens({ username: 'api_user', role: 'user' }).accessToken;
+    adminToken = generateTokens({ username: 'api_admin', role: 'admin' }).accessToken;
+});
+
+afterAll(async () => {
+    fs.rmSync(TEST_DIR, { recursive: true, force: true });
+    try {
+        fs.unlinkSync(path.join(__dirname, '..', 'data', 'test_api.db'));
+    } catch (e) { }
+});
+
+describe('General API Endpoints', () => {
+    test('GET /api/bootstrap', async () => {
+        const res = await request(app).get(`/api/bootstrap?username=api_user&edition=${TEST_EDITION}`);
+        expect(res.statusCode).toBe(200);
+        expect(res.body.films).toHaveLength(2);
+        expect(res.body.categories).toHaveLength(1);
+        expect(res.body.profile).toBeDefined();
+    });
+
+    test('PATCH /api/users/:username/films/:filmId - Protected by JWT', async () => {
+        const res = await request(app)
+            .patch(`/api/users/api_user/films/film1?edition=${TEST_EDITION}`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({ watched: true, personalRating: 5 });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.filmState.watched).toBe(true);
+        expect(res.body.filmState.personalRating).toBe(5);
+    });
+
+    test('PATCH /api/predictions/:username/:categoryId - Protected by JWT', async () => {
+        const res = await request(app)
+            .patch(`/api/predictions/api_user/cat1?edition=${TEST_EDITION}`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({ nomineeId: 'nom1' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.predictions['cat1']).toBe('nom1');
+    });
+
+    test('PATCH /api/results/official/:categoryId - Rejects standard user', async () => {
+        const res = await request(app)
+            .patch(`/api/results/official/cat1?edition=${TEST_EDITION}`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({ nomineeId: 'nom2' });
+
+        expect(res.statusCode).toBe(403);
+    });
+
+    test('PATCH /api/results/official/:categoryId - Accepts admin user', async () => {
+        const res = await request(app)
+            .patch(`/api/results/official/cat1?edition=${TEST_EDITION}`)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ nomineeId: 'nom2' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.officialResults['cat1']).toBe('nom2');
+    });
+
+    test('GET /api/results/compare/users - Returns comparison', async () => {
+        const res = await request(app).get(`/api/results/compare/users?left=api_user&right=api_admin&edition=${TEST_EDITION}`);
+        expect(res.statusCode).toBe(200);
+        expect(res.body.totalCategories).toBe(1);
+    });
+});

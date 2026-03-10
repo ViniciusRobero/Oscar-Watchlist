@@ -36,6 +36,27 @@
       },
       "predictions": {},
       "createdAt": "2026-03-09T21:39:17.010Z"
+    },
+    "Vini": {
+      "passwordHash": "4f0ac4e8a354392685688c1297a228bb:5e92a9df63319667f45b20c70f389e0dda00e7db3fc8cc5e5883306097767a23647b422c28a2de5ab350cae84af6a613d17132dbe90e8b1d75b6c2ac04edeb82",
+      "films": {
+        "bugonia": {
+          "watched": true,
+          "personalRating": 8,
+          "personalNotes": ""
+        }
+      },
+      "predictions": {
+        "melhor-filme": "one-battle-after-another",
+        "direcao": "sinners"
+      },
+      "createdAt": "2026-03-09T22:34:21.709Z"
+    },
+    "Tester": {
+      "passwordHash": "d8930a38d33da0d634b69c4ddb4ea752:18927612a62fed2643cbc9a9c92abaa606489c41dc7aa996e41a030f6565812499290ce3492e7d9e2e6184fa3ccc410895e097bebf886bf459d1ae7f5450173b",
+      "films": {},
+      "predictions": {},
+      "createdAt": "2026-03-09T22:35:13.902Z"
     }
   },
   "officialResults": {},

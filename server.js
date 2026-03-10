@@ -72,10 +72,17 @@ app.use('/assets', express.static(path.join(__dirname, 'client', 'public', 'asse
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 
 // ── API ──────────────────────────────────────────────────────
-app.get('/api/bootstrap', (req, res) => {
-  const username = String(req.query.username || '').trim();
-  const edition = req.query.edition || '';
-  res.json(buildBootstrap(username, edition));
+app.get('/api/bootstrap', async (req, res) => {
+  try {
+    const username = String(req.query.username || '').trim();
+    const edition = req.query.edition || '';
+    const { buildBootstrapAsync } = require('./data/db');
+    const data = await buildBootstrapAsync(username, edition);
+    res.json(data);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 });
 
 app.get('/api/editions', (_req, res) => res.json(loadEditions()));
@@ -276,19 +283,23 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  const editions = loadEditions();
-  const current = editions.find(e => e.current) || editions[0];
-  console.log(`\n  🎬  Oscar Watchlist v6 → http://localhost:${PORT}`);
-  console.log(`  📅  Edição ativa: ${current?.label || 'N/A'}`);
-  if (process.env.TMDB_API_KEY) {
-    console.log(`  ✓   TMDB API configurada — capas em alta qualidade\n`);
-  } else if (process.env.OMDB_API_KEY) {
-    console.log(`  ✓   OMDB API configurada\n`);
-  } else {
-    console.log(`  📷  Baixando capas via Wikipedia em background (sem chave necessária)...`);
-    console.log(`  💡  Para capas de maior qualidade: TMDB_API_KEY=sua_chave npm start\n`);
-  }
-  // Always try to prefetch missing posters using available sources
-  prefetchAllPosters().catch(() => { });
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    const editions = loadEditions();
+    const current = editions.find(e => e.current) || editions[0];
+    console.log(`\n  🎬  Oscar Watchlist v6 → http://localhost:${PORT}`);
+    console.log(`  📅  Edição ativa: ${current?.label || 'N/A'}`);
+    if (process.env.TMDB_API_KEY) {
+      console.log(`  ✓   TMDB API configurada — capas em alta qualidade\n`);
+    } else if (process.env.OMDB_API_KEY) {
+      console.log(`  ✓   OMDB API configurada\n`);
+    } else {
+      console.log(`  📷  Baixando capas via Wikipedia em background (sem chave necessária)...`);
+      console.log(`  💡  Para capas de maior qualidade: TMDB_API_KEY=sua_chave npm start\n`);
+    }
+    // Always try to prefetch missing posters using available sources
+    prefetchAllPosters().catch(() => { });
+  });
+}
+
+module.exports = app;

@@ -1,133 +1,133 @@
 const express = require('express');
-const { loadState, saveState, ensureUser, buildBootstrap, hashPassword, verifyPassword } = require('../data/db');
-const { generateTokens, verifyRefresh, revokeRefreshToken } = require('../middleware/auth');
+const { getUser, createUser, hashPassword, verifyPassword, buildBootstrapAsync } = require('../data/db');
+const { generateTokensAsync, verifyRefreshAsync, revokeRefreshTokenAsync } = require('../middleware/auth');
 
 const router = express.Router();
 
-// ── POST /api/auth/login ─────────────────────────────────────────────────────
-// Body: { username, password }
-// Returns: { accessToken, refreshToken, user: bootstrapData }
-router.post('/login', (req, res) => {
-  const username = String(req.body.username || '').trim();
-  const password = String(req.body.password || '').trim();
-  const edition = req.query.edition || req.body?.edition || '';
+router.post('/login', async (req, res) => {
+  try {
+    const username = String(req.body.username || '').trim();
+    const password = String(req.body.password || '').trim();
+    const edition = req.query.edition || req.body?.edition || '';
 
-  if (!username) return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
-  if (username.length > 40) return res.status(400).json({ error: 'Nome de usuário muito longo (máx. 40 caracteres).' });
-  if (!password) return res.status(400).json({ error: 'Senha é obrigatória.' });
-  if (password.length < 3) return res.status(400).json({ error: 'Senha muito curta (mín. 3 caracteres).' });
-  if (password.length > 100) return res.status(400).json({ error: 'Senha muito longa.' });
+    if (!username) return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
+    if (!password) return res.status(400).json({ error: 'Senha é obrigatória.' });
 
-  const state = loadState(edition);
-  const existingUser = state.users[username];
+    const existingUser = await getUser(username);
 
-  if (existingUser) {
-    // User exists — verify password
-    if (existingUser.passwordHash) {
-      const valid = verifyPassword(password, existingUser.passwordHash);
-      if (!valid) return res.status(401).json({ error: 'Senha incorreta.' });
+    if (existingUser) {
+      if (existingUser.passwordHash) {
+        const valid = verifyPassword(password, existingUser.passwordHash);
+        if (!valid) return res.status(401).json({ error: 'Senha incorreta.' });
+      } else {
+        return res.status(401).json({ error: 'Sua conta precisa ser migrada.' });
+      }
     } else {
-      // Legacy user without password — set it now
-      existingUser.passwordHash = hashPassword(password);
-      saveState(state, edition);
+      return res.status(404).json({ error: 'Usuário não encontrado. Use o registro para criar uma conta.' });
     }
-  } else {
-    // New user — not allowed via login (use register)
-    return res.status(404).json({ error: 'Usuário não encontrado. Use o registro para criar uma conta.' });
+
+    const { accessToken, refreshToken } = await generateTokensAsync(existingUser);
+    const bootstrapData = await buildBootstrapAsync(username, edition);
+
+    res.json({
+      accessToken,
+      refreshToken,
+      ...bootstrapData,
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
   }
-
-  const role = existingUser.role || 'user';
-  const { accessToken, refreshToken } = generateTokens({ username, role });
-  const bootstrapData = buildBootstrap(username, edition);
-
-  res.json({
-    accessToken,
-    refreshToken,
-    ...bootstrapData,
-  });
 });
 
-// ── POST /api/auth/register ──────────────────────────────────────────────────
-// Body: { username, password }
-// Creates a new user account
-router.post('/register', (req, res) => {
-  const username = String(req.body.username || '').trim();
-  const password = String(req.body.password || '').trim();
-  const edition = req.query.edition || req.body?.edition || '';
+router.post('/register', async (req, res) => {
+  try {
+    const username = String(req.body.username || '').trim();
+    const password = String(req.body.password || '').trim();
+    const edition = req.query.edition || req.body?.edition || '';
 
-  if (!username) return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
-  if (username.length > 40) return res.status(400).json({ error: 'Nome de usuário muito longo (máx. 40 caracteres).' });
-  if (username.length < 2) return res.status(400).json({ error: 'Nome de usuário muito curto (mín. 2 caracteres).' });
-  if (!/^[a-zA-Z0-9À-ÿ_ -]+$/.test(username)) return res.status(400).json({ error: 'Nome de usuário contém caracteres inválidos.' });
-  if (!password) return res.status(400).json({ error: 'Senha é obrigatória.' });
-  if (password.length < 6) return res.status(400).json({ error: 'Senha muito curta (mín. 6 caracteres).' });
-  if (password.length > 100) return res.status(400).json({ error: 'Senha muito longa.' });
+    if (!username || username.length < 2 || username.length > 40) {
+      return res.status(400).json({ error: 'Nome de usuário inválido.' });
+    }
+    if (!/^[a-zA-Z0-9À-ÿ_ -]+$/.test(username)) {
+      return res.status(400).json({ error: 'Nome de usuário contém caracteres inválidos.' });
+    }
+    if (!password || password.length < 6 || password.length > 100) {
+      return res.status(400).json({ error: 'Senha inválida (mín. 6 caracteres).' });
+    }
 
-  const state = loadState(edition);
+    const existingUser = await getUser(username);
+    if (existingUser) {
+      return res.status(409).json({ error: 'Esse nome de usuário já existe.' });
+    }
 
-  // Check if user already exists
-  if (state.users[username]) {
-    return res.status(409).json({ error: 'Esse nome de usuário já existe.' });
+    const ph = hashPassword(password);
+    const newUser = await createUser(username, ph, 'user');
+
+    const { accessToken, refreshToken } = await generateTokensAsync(newUser);
+    const bootstrapData = await buildBootstrapAsync(username, edition);
+
+    res.status(201).json({
+      accessToken,
+      refreshToken,
+      ...bootstrapData,
+    });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
   }
-
-  const ph = hashPassword(password);
-  ensureUser(state, username, ph);
-  saveState(state, edition);
-
-  const { accessToken, refreshToken } = generateTokens({ username, role: 'user' });
-  const bootstrapData = buildBootstrap(username, edition);
-
-  res.status(201).json({
-    accessToken,
-    refreshToken,
-    ...bootstrapData,
-  });
 });
 
-// ── POST /api/auth/refresh ───────────────────────────────────────────────────
-// Body: { refreshToken }
-// Returns: { accessToken, refreshToken } (rotated)
-router.post('/refresh', (req, res) => {
-  const { refreshToken } = req.body || {};
-  if (!refreshToken) {
-    return res.status(400).json({ error: 'Refresh token é obrigatório.' });
+router.post('/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body || {};
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token é obrigatório.' });
+    }
+
+    const payload = await verifyRefreshAsync(refreshToken);
+    if (!payload) {
+      return res.status(401).json({ error: 'Refresh token inválido ou expirado.' });
+    }
+
+    await revokeRefreshTokenAsync(refreshToken);
+
+    const tokens = await generateTokensAsync({
+      username: payload.username,
+      role: payload.role,
+    });
+
+    res.json(tokens);
+  } catch (e) {
+    console.error('Refresh error:', e);
+    res.status(500).json({ error: 'Erro interno.' });
   }
-
-  const payload = verifyRefresh(refreshToken);
-  if (!payload) {
-    return res.status(401).json({ error: 'Refresh token inválido ou expirado.' });
-  }
-
-  // Revoke old refresh token (rotation)
-  revokeRefreshToken(refreshToken);
-
-  // Issue new pair
-  const tokens = generateTokens({
-    username: payload.username,
-    role: payload.role,
-  });
-
-  res.json(tokens);
 });
 
-// ── POST /api/auth/logout ────────────────────────────────────────────────────
-// Body: { refreshToken }
-// Revokes the refresh token
-router.post('/logout', (req, res) => {
-  const { refreshToken } = req.body || {};
-  if (refreshToken) {
-    revokeRefreshToken(refreshToken);
+router.post('/logout', async (req, res) => {
+  try {
+    const { refreshToken } = req.body || {};
+    if (refreshToken) {
+      await revokeRefreshTokenAsync(refreshToken);
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Logout error:', e);
+    res.status(500).json({ ok: true }); // even on error, we don't block user
   }
-  res.json({ ok: true });
 });
 
-// ── GET /api/auth/users ──────────────────────────────────────────────────────
-// List usernames (no passwords) for public display
-router.get('/users', (req, res) => {
-  const edition = req.query.edition || '';
-  const state = loadState(edition);
-  const usernames = Object.keys(state.users).sort((a, b) => a.localeCompare(b));
-  res.json({ usernames });
+router.get('/users', async (req, res) => {
+  try {
+    const { summarizeUsers } = require('../data/db');
+    const edition = req.query.edition || '';
+    const summaries = await summarizeUsers(edition);
+    const usernames = summaries.map(s => s.username);
+    res.json({ usernames });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Erro interno.' });
+  }
 });
 
 module.exports = router;

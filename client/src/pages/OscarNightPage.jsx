@@ -39,9 +39,8 @@ function ResultRow({ category, prediction, officialNomineeId, onSetWinner, isAdm
 
   return (
     <div
-      className={`card overflow-hidden ${
-        isCorrect ? 'border-emerald-800/60' : isWrong ? 'border-red-900/40' : ''
-      }`}
+      className={`card overflow-hidden ${isCorrect ? 'border-emerald-800/60' : isWrong ? 'border-red-900/40' : ''
+        }`}
     >
       <div className="flex items-center gap-3 px-4 py-3.5">
         <div className="shrink-0">
@@ -194,14 +193,16 @@ export function OscarNightPage() {
             Acompanhe os resultados e veja seus acertos.
           </p>
         </div>
-        <button
-          onClick={() => setIsAdmin((v) => !v)}
-          className={`btn text-xs py-1.5 px-3 ${isAdmin ? 'border-gold-dim text-gold' : ''}`}
-          title="Modo admin: define os vencedores oficiais"
-        >
-          {isAdmin ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-          {isAdmin ? 'Admin on' : 'Admin off'}
-        </button>
+        {state.userRole === 'admin' && (
+          <button
+            onClick={() => setIsAdmin((v) => !v)}
+            className={`btn text-xs py-1.5 px-3 ${isAdmin ? 'border-gold-dim text-gold' : ''}`}
+            title="Modo admin: define os vencedores oficiais"
+          >
+            {isAdmin ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+            {isAdmin ? 'Admin on' : 'Admin off'}
+          </button>
+        )}
       </div>
 
       {hasUser && (

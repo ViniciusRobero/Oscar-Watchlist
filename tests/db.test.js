@@ -1,176 +1,124 @@
-#!/usr/bin/env node
-/**
- * Oscar Watchlist — Testes básicos para db.js
- * --------------------------------------------
- * Roda com: node tests/db.test.js
- */
-
-const path = require('path');
 const fs = require('fs');
-const assert = require('assert');
+const path = require('path');
 
-// Setup: create a temp edition for testing
-const DATA_DIR = path.join(__dirname, '..', 'data');
-const TEST_EDITION = '__test__';
-const TEST_DIR = path.join(DATA_DIR, 'editions', TEST_EDITION);
-
-function setup() {
-    fs.mkdirSync(TEST_DIR, { recursive: true });
-    fs.writeFileSync(path.join(TEST_DIR, 'films.json'), JSON.stringify([
-        { id: 'test-film-1', title: 'Test Film 1', poster: '/assets/covers/test.svg' },
-        { id: 'test-film-2', title: 'Test Film 2', poster: '/assets/covers/test2.svg' },
-    ]));
-    fs.writeFileSync(path.join(TEST_DIR, 'categories.json'), JSON.stringify([
-        {
-            id: 'best-picture', name: 'Best Picture', nominees: [
-                { id: 'test-film-1', filmId: 'test-film-1', nomineeName: null },
-                { id: 'test-film-2', filmId: 'test-film-2', nomineeName: null },
-            ], officialWinner: null, highlight: true
-        },
-    ]));
-    fs.writeFileSync(path.join(TEST_DIR, 'state.json'), JSON.stringify({
-        schemaVersion: 2, users: {}, officialResults: {}
-    }));
-}
-
-function cleanup() {
-    try {
-        fs.rmSync(TEST_DIR, { recursive: true, force: true });
-    } catch { }
-}
-
-let passed = 0;
-let failed = 0;
-
-function test(name, fn) {
-    try {
-        fn();
-        console.log(`  ✅ ${name}`);
-        passed++;
-    } catch (e) {
-        console.log(`  ❌ ${name}`);
-        console.log(`     ${e.message}`);
-        failed++;
-    }
-}
-
-// Run tests
-console.log('\n🧪  Testes db.js\n' + '─'.repeat(40));
-
-setup();
-
+process.env.TURSO_URL = `file:${path.join(__dirname, '..', 'data', 'test_db.db')}`;
 const db = require('../data/db');
 
-test('loadEditions returns array', () => {
-    const editions = db.loadEditions();
-    assert(Array.isArray(editions), 'Should be an array');
-    assert(editions.length > 0, 'Should have at least one edition');
+const TEST_EDITION = '__test_db__';
+const TEST_DIR = path.join(__dirname, '..', 'data', 'editions', TEST_EDITION);
+
+beforeAll(async () => {
+    fs.mkdirSync(TEST_DIR, { recursive: true });
+    fs.writeFileSync(path.join(TEST_DIR, 'films.json'), '[]');
+    fs.writeFileSync(path.join(TEST_DIR, 'categories.json'), '[]');
+
+    const schemaSql = fs.readFileSync(path.join(__dirname, '..', 'data', 'schema.sql'), 'utf8');
+    await db.dbClient.executeMultiple(schemaSql);
 });
 
-test('getCurrentEditionId returns a string', () => {
-    const id = db.getCurrentEditionId();
-    assert(typeof id === 'string', 'Should be a string');
-    assert(id.length > 0, 'Should not be empty');
+afterAll(async () => {
+    fs.rmSync(TEST_DIR, { recursive: true, force: true });
+    try {
+        fs.unlinkSync(path.join(__dirname, '..', 'data', 'test_db.db'));
+    } catch (e) { }
 });
 
-test('resolveEdition returns given ID or current', () => {
-    assert.strictEqual(db.resolveEdition('2026'), '2026');
-    assert.strictEqual(db.resolveEdition(''), db.getCurrentEditionId());
-    assert.strictEqual(db.resolveEdition(null), db.getCurrentEditionId());
+beforeEach(async () => {
+    await db.dbClient.executeMultiple(`
+      DELETE FROM user_predictions;
+      DELETE FROM user_film_states;
+      DELETE FROM refresh_tokens;
+      DELETE FROM official_results;
+      DELETE FROM users;
+    `);
 });
 
-test('loadFilms loads test edition', () => {
-    const films = db.loadFilms(TEST_EDITION);
-    assert(Array.isArray(films), 'Should be an array');
-    assert.strictEqual(films.length, 2);
-    assert.strictEqual(films[0].id, 'test-film-1');
+describe('Database Core Async Functions', () => {
+    test('User creation and retrieval', async () => {
+        const user = await db.createUser('alice', 'hash123', 'admin');
+        expect(user.username).toBe('alice');
+        expect(user.role).toBe('admin');
+
+        const fetched = await db.getUser('alice');
+        expect(fetched.passwordHash).toBe('hash123');
+    });
+
+    test('ensureUserAsync fallback logic', async () => {
+        const u1 = await db.ensureUserAsync('bob', 'hash_bob');
+        expect(u1.username).toBe('bob');
+        expect(u1.passwordHash).toBe('hash_bob');
+
+        // Should update password if requested but not exist
+        await db.dbClient.execute("UPDATE users SET password_hash = NULL WHERE id = 'bob'");
+        const u2 = await db.ensureUserAsync('bob', 'new_hash');
+        expect(u2.passwordHash).toBe('new_hash');
+    });
+
+    test('Film states CRUD', async () => {
+        const user = await db.createUser('charlie', 'hash', 'user');
+
+        // Default
+        let state = await db.getFilmState('charlie', 'film1', TEST_EDITION);
+        expect(state.watched).toBe(false);
+
+        // Update
+        await db.updateFilmState('charlie', 'film1', TEST_EDITION, { watched: true, personalRating: 8 });
+        state = await db.getFilmState('charlie', 'film1', TEST_EDITION);
+        expect(state.watched).toBe(true);
+        expect(state.personalRating).toBe(8);
+
+        // Partial update
+        await db.updateFilmState('charlie', 'film1', TEST_EDITION, { personalNotes: 'good' });
+        state = await db.getFilmState('charlie', 'film1', TEST_EDITION);
+        expect(state.watched).toBe(true);
+        expect(state.personalNotes).toBe('good');
+    });
+
+    test('Predictions CRUD', async () => {
+        await db.createUser('dave', 'hash', 'user');
+
+        await db.updatePrediction('dave', 'cat1', TEST_EDITION, 'nom1');
+        await db.updatePrediction('dave', 'cat2', TEST_EDITION, 'nom2');
+
+        const preds = await db.getPredictionsMap('dave', TEST_EDITION);
+        expect(preds['cat1']).toBe('nom1');
+        expect(preds['cat2']).toBe('nom2');
+
+        // Remove
+        await db.updatePrediction('dave', 'cat1', TEST_EDITION, null);
+        const predsAfter = await db.getPredictionsMap('dave', TEST_EDITION);
+        expect(predsAfter['cat1']).toBeUndefined();
+    });
+
+    test('Official Results CRUD', async () => {
+        await db.updateOfficialResult('cat1', TEST_EDITION, 'nom1');
+        let results = await db.getOfficialResults(TEST_EDITION);
+        expect(results['cat1']).toBe('nom1');
+
+        await db.updateOfficialResult('cat1', TEST_EDITION, null);
+        results = await db.getOfficialResults(TEST_EDITION);
+        expect(results['cat1']).toBeUndefined();
+    });
+
+    test('summarizeUsers calculates metrics', async () => {
+        await db.createUser('userA', 'hash', 'user');
+        await db.createUser('userB', 'hash', 'user');
+
+        await db.updateFilmState('userA', 'film1', TEST_EDITION, { watched: true, personalRating: 10 });
+        await db.updateFilmState('userA', 'film2', TEST_EDITION, { watched: true, personalRating: 8 });
+        await db.updatePrediction('userB', 'cat1', TEST_EDITION, 'nom1');
+
+        const summaries = await db.summarizeUsers(TEST_EDITION);
+        expect(summaries).toHaveLength(2);
+
+        const userA = summaries.find(s => s.username === 'userA');
+        expect(userA.watchedCount).toBe(2);
+        expect(userA.ratingsCount).toBe(2);
+        expect(userA.averageRating).toBe('9.0');
+        expect(userA.predictionsCount).toBe(0);
+
+        const userB = summaries.find(s => s.username === 'userB');
+        expect(userB.watchedCount).toBe(0);
+        expect(userB.predictionsCount).toBe(1);
+    });
 });
-
-test('loadCategories loads test edition', () => {
-    const cats = db.loadCategories(TEST_EDITION);
-    assert(Array.isArray(cats), 'Should be an array');
-    assert.strictEqual(cats.length, 1);
-    assert.strictEqual(cats[0].id, 'best-picture');
-});
-
-test('loadState loads test edition with defaults', () => {
-    const state = db.loadState(TEST_EDITION);
-    assert(state.users !== undefined, 'Should have users');
-    assert(state.officialResults !== undefined, 'Should have officialResults');
-    assert.strictEqual(state.schemaVersion, 2);
-});
-
-test('ensureUser creates new user', () => {
-    const state = db.loadState(TEST_EDITION);
-    const user = db.ensureUser(state, 'alice');
-    assert(user !== null, 'Should return user object');
-    assert(user.films !== undefined, 'Should have films');
-    assert(user.predictions !== undefined, 'Should have predictions');
-    assert(user.createdAt !== undefined, 'Should have createdAt');
-});
-
-test('ensureUser returns existing user', () => {
-    const state = db.loadState(TEST_EDITION);
-    db.ensureUser(state, 'bob');
-    const user2 = db.ensureUser(state, 'bob');
-    assert(user2 !== null, 'Should return existing user');
-});
-
-test('ensureUser returns null for empty username', () => {
-    const state = db.loadState(TEST_EDITION);
-    assert.strictEqual(db.ensureUser(state, ''), null);
-    assert.strictEqual(db.ensureUser(state, null), null);
-});
-
-test('normalizeFilmState creates default state', () => {
-    const user = { films: {}, predictions: {} };
-    const fs = db.normalizeFilmState(user, 'test-film-1');
-    assert.strictEqual(fs.watched, false);
-    assert.strictEqual(fs.personalRating, null);
-    assert.strictEqual(fs.personalNotes, '');
-});
-
-test('saveState and loadState round-trip', () => {
-    const state = db.loadState(TEST_EDITION);
-    db.ensureUser(state, 'charlie');
-    state.users['charlie'].predictions['best-picture'] = 'test-film-1';
-    db.saveState(state, TEST_EDITION);
-
-    const loaded = db.loadState(TEST_EDITION);
-    assert.strictEqual(loaded.users['charlie'].predictions['best-picture'], 'test-film-1');
-});
-
-test('hashPassword and verifyPassword work', () => {
-    const hash = db.hashPassword('test123');
-    assert(typeof hash === 'string', 'Hash should be a string');
-    assert(hash.includes(':'), 'Hash should contain separator');
-    assert(db.verifyPassword('test123', hash), 'Should verify correct password');
-    assert(!db.verifyPassword('wrong', hash), 'Should reject wrong password');
-});
-
-test('buildBootstrap returns complete data for test edition', () => {
-    const data = db.buildBootstrap('charlie', TEST_EDITION);
-    assert.strictEqual(data.edition, TEST_EDITION);
-    assert(Array.isArray(data.editions), 'Should have editions');
-    assert(Array.isArray(data.films), 'Should have films');
-    assert(Array.isArray(data.categories), 'Should have categories');
-    assert(Array.isArray(data.users), 'Should have users list');
-    assert(data.profile !== undefined, 'Should have profile');
-    assert(data.officialResults !== undefined, 'Should have officialResults');
-});
-
-test('summarizeUsers provides correct stats', () => {
-    const state = db.loadState(TEST_EDITION);
-    const summaries = db.summarizeUsers(state);
-    assert(Array.isArray(summaries), 'Should be an array');
-    const charlie = summaries.find(s => s.username === 'charlie');
-    assert(charlie !== undefined, 'Should find charlie');
-    assert.strictEqual(charlie.predictionsCount, 1);
-});
-
-// Cleanup
-cleanup();
-
-console.log('─'.repeat(40));
-console.log(`\n  Total: ${passed + failed} | ✅ ${passed} | ❌ ${failed}\n`);
-process.exit(failed > 0 ? 1 : 0);

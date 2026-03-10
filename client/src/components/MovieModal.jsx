@@ -273,32 +273,31 @@ export function MovieModal({ film, onClose }) {
 
               {/* Notes */}
               <div>
-                <p className="text-sm text-gray-300 mb-2">Notas pessoais</p>
+                <p className="text-sm text-gray-300 mb-2">Notas pessoais (Salva automaticamente)</p>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  onBlur={() => {
+                    if (notes !== (filmState.personalNotes || '')) {
+                      handleSaveNotes(false);
+                    }
+                  }}
                   disabled={!hasUser}
-                  placeholder="Escreva suas impressões sobre o filme..."
+                  placeholder="Escreva suas impressões sobre o filme... (Mude de campo para salvar)"
                   rows={3}
                   className="input resize-none text-sm disabled:opacity-40"
                   maxLength={600}
                 />
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-gray-600">{notes.length}/600</span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleSaveNotes(false)}
-                      disabled={!hasUser || saving}
-                      className="btn text-xs py-1.5 px-3"
-                    >
-                      {saving ? 'Salvando...' : 'Salvar'}
-                    </button>
+                  <div className="flex gap-2 items-center">
+                    {saving && <span className="text-xs text-gray-500 animate-pulse">Salvando...</span>}
                     <button
                       onClick={() => handleSaveNotes(true)}
                       disabled={!hasUser || saving}
                       className="btn btn-gold text-xs py-1.5 px-3"
                     >
-                      Salvar e fechar
+                      {saving ? '...' : 'Salvar e Fechar'}
                     </button>
                   </div>
                 </div>

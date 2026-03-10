@@ -151,6 +151,8 @@ export function UsersPage() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
+  const isFormValid = newName.trim().length >= 2 && newPassword.length >= 6 && newPassword === confirmPassword;
+
   async function handleLogin(username, password) {
     await login(username, password);
     localStorage.setItem('oscar_active_user', username);
@@ -191,6 +193,8 @@ export function UsersPage() {
         <p className="meta-label mb-3">Criar novo perfil</p>
         <form onSubmit={handleCreate} className="space-y-3">
           <input
+            name="username"
+            autoComplete="username"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Nome de usuário"
@@ -199,6 +203,8 @@ export function UsersPage() {
           />
           <div className="relative">
             <input
+              name="password"
+              autoComplete="new-password"
               type={showPw ? 'text' : 'password'}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -214,6 +220,8 @@ export function UsersPage() {
             </button>
           </div>
           <input
+            name="confirmPassword"
+            autoComplete="new-password"
             type={showPw ? 'text' : 'password'}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -227,7 +235,7 @@ export function UsersPage() {
           )}
           <button
             type="submit"
-            disabled={!newName.trim() || !newPassword.trim() || creating}
+            disabled={!isFormValid || creating}
             className="btn btn-gold px-4 w-full"
           >
             <PlusCircle className="w-4 h-4" />
