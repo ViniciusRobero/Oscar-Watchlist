@@ -3,10 +3,14 @@ const { createClient } = require('@libsql/client');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+
+const BCRYPT_ROUNDS = 12;
 
 const DATA_DIR = path.join(__dirname);
 const EDITIONS_DIR = path.join(DATA_DIR, 'editions');
 const EDITIONS_PATH = path.join(DATA_DIR, 'editions.json');
+const AWARDS_PATH = path.join(DATA_DIR, 'awards.json');
 
 // Legacy paths (kept as fallback for static config data)
 const LEGACY_FILMS_PATH = path.join(DATA_DIR, 'films.json');
@@ -21,11 +25,19 @@ const dbClient = createClient({ url, authToken });
 
 // ── Editions ────────────────────────────────────────────────────────────────
 
+function loadAwards() {
+  try {
+    return JSON.parse(fs.readFileSync(AWARDS_PATH, 'utf8'));
+  } catch {
+    return [{ id: 'oscar', name: 'Oscar', fullName: 'Academy Awards', type: 'cinema', icon: '🏆', active: true }];
+  }
+}
+
 function loadEditions() {
   try {
     return JSON.parse(fs.readFileSync(EDITIONS_PATH, 'utf8'));
   } catch {
-    return [{ id: '2026', label: 'Oscar 2026', year: 2026, current: true }];
+    return [{ id: '2026', award_id: 'oscar', label: 'Oscar 2026', year: 2026, current: true }];
   }
 }
 
@@ -44,18 +56,25 @@ function editionDir(editionId) {
 }
 
 // ── Password helpers ────────────────────────────────────────────────────────
+// New hashes use bcrypt. Legacy PBKDF2 hashes (salt:hash, 128 hex chars) are
+// still verified for backwards compatibility.
 
 function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
-  return `${salt}:${hash}`;
+  return bcrypt.hashSync(password, BCRYPT_ROUNDS);
 }
 
 function verifyPassword(password, stored) {
   try {
-    const [salt, hash] = stored.split(':');
-    const verify = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
-    return verify === hash;
+    if (!stored) return false;
+    // Legacy PBKDF2 format: "hexsalt:hexhash" (both 32+ chars, no $ prefix)
+    if (!stored.startsWith('$')) {
+      const [salt, hash] = stored.split(':');
+      if (!salt || !hash) return false;
+      const verify = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+      return verify === hash;
+    }
+    // bcrypt format: "$2b$..."
+    return bcrypt.compareSync(password, stored);
   } catch {
     return false;
   }
@@ -323,6 +342,16 @@ async function buildBootstrapAsync(username, editionId) {
   const films = loadFilms(eid);
   const categories = loadCategories(eid);
   const editions = loadEditions();
+  const awards = loadAwards();
+
+  // Attach award info to each edition
+  const editionsWithAward = editions.map(e => ({
+    ...e,
+    award: awards.find(a => a.id === e.award_id) || null,
+  }));
+
+  // Current edition's award
+  const currentEdition = editionsWithAward.find(e => e.id === eid);
 
   let profile = { films: {}, predictions: {} };
   const user = await getUser(username);
@@ -338,7 +367,9 @@ async function buildBootstrapAsync(username, editionId) {
 
   return {
     edition: eid,
-    editions,
+    editions: editionsWithAward,
+    awards,
+    currentAward: currentEdition?.award || null,
     films,
     categories,
     users: usersList,
@@ -351,6 +382,7 @@ async function buildBootstrapAsync(username, editionId) {
 
 module.exports = {
   dbClient,
+  loadAwards,
   loadEditions,
   getCurrentEditionId,
   resolveEdition,

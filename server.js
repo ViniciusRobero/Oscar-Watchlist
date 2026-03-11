@@ -25,8 +25,9 @@ const http = require('http');
 const fs = require('fs');
 const helmet = require('helmet');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
-const { buildBootstrap, loadFilms, loadCategories, loadEditions, resolveEdition, saveFilms } = require('./data/db');
+const { buildBootstrap, loadFilms, loadCategories, loadEditions, loadAwards, resolveEdition, saveFilms } = require('./data/db');
 
 const usersRouter = require('./routes/users');
 const predictionsRouter = require('./routes/predictions');
@@ -43,11 +44,15 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
+const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: CORS_ORIGIN === '*' ? true : CORS_ORIGIN.split(',').map(s => s.trim()),
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
+
+app.use(cookieParser());
 
 // Rate limiting for auth routes
 const authLimiter = rateLimit({
@@ -85,6 +90,7 @@ app.get('/api/bootstrap', async (req, res) => {
   }
 });
 
+app.get('/api/awards', (_req, res) => res.json(loadAwards()));
 app.get('/api/editions', (_req, res) => res.json(loadEditions()));
 
 app.get('/api/films', (req, res) => {

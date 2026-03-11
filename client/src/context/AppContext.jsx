@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useCallback } from 'react';
 import { api, setCurrentEdition, setTokens, clearTokens, isAuthenticated as checkAuth } from '../api.js';
+// Note: setTokens now only takes accessToken — refresh token is handled via HttpOnly cookie
 
 const AppContext = createContext(null);
 
@@ -13,6 +14,8 @@ const initialState = {
   officialResults: {},
   edition: '',
   editions: [],
+  awards: [],
+  currentAward: null,
   loading: true,
   error: null,
   toast: null,
@@ -121,6 +124,7 @@ export function AppProvider({ children }) {
   const login = useCallback(
     async (username, password) => {
       const data = await api.login(username, password);
+      if (username) localStorage.setItem('oscar_active_user', username);
       hydrate({
         ...data,
         isAuthenticated: true,
@@ -134,6 +138,7 @@ export function AppProvider({ children }) {
   const register = useCallback(
     async (username, password) => {
       const data = await api.register(username, password);
+      if (username) localStorage.setItem('oscar_active_user', username);
       hydrate({
         ...data,
         isAuthenticated: true,

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trophy, Users, Star, Calendar, BarChart3, ChevronDown, LogIn, PlusCircle, X } from 'lucide-react';
+import { Trophy, Users, Star, Calendar, BarChart3, ChevronDown, LogIn, ChevronLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 
 const NAV_ITEMS = [
@@ -153,7 +153,7 @@ function UserDropdown({ onClose, onNavigate }) {
   );
 }
 
-export function Layout({ activePage, onChangePage, children }) {
+export function Layout({ activePage, onChangePage, onBackToHub, currentAward, children }) {
   const { state } = useApp();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
@@ -163,18 +163,28 @@ export function Layout({ activePage, onChangePage, children }) {
     ? state.films.filter((f) => state.profile.films[f.id]?.watched).length
     : 0;
 
+  const awardIcon = currentAward?.icon || '🏆';
+  const editionLabel = (state.editions || []).find(e => e.id === state.edition)?.label || 'Oscar Watchlist';
+
   return (
     <div className="min-h-screen bg-bg-base">
       {/* Top header */}
       <header className="sticky top-0 z-40 border-b border-border bg-bg-base/90 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          {/* Logo + Edition */}
+          {/* Logo + back to hub */}
           <div className="flex items-center gap-2.5">
-            <Trophy className="w-5 h-5 text-gold" />
-            <span className="font-display text-lg text-gray-100 hidden sm:block">
-              {(state.editions || []).find(e => e.id === state.edition)?.label || 'Oscar Watchlist'}
-            </span>
-            <span className="font-display text-lg text-gray-100 sm:hidden">Oscar</span>
+            {onBackToHub ? (
+              <button
+                onClick={onBackToHub}
+                className="flex items-center gap-1 text-gray-400 hover:text-gray-100 transition-colors mr-1"
+                title="Voltar às premiações"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            ) : null}
+            <span className="text-lg">{awardIcon}</span>
+            <span className="font-display text-lg text-gray-100 hidden sm:block">{editionLabel}</span>
+            <span className="font-display text-lg text-gray-100 sm:hidden">{currentAward?.name || 'Oscar'}</span>
             <EditionSelector />
           </div>
 

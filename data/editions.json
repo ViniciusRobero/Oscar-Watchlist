@@ -3,6 +3,7 @@
         "id": "2026",
         "label": "Oscar 2026 (98ª Cerimônia)",
         "year": 2026,
-        "current": true
+        "current": true,
+        "award_id": "oscar"
     }
 ]

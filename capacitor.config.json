@@ -1,0 +1,20 @@
+{
+  "appId": "com.watchlist.oscar",
+  "appName": "Oscar Watchlist",
+  "webDir": "client/dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": "release-key.keystore",
+      "keystoreAlias": "oscar-watchlist",
+      "releaseType": "APK"
+    }
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}

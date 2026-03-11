@@ -1,0 +1,42 @@
+[
+  {
+    "id": "oscar",
+    "name": "Oscar",
+    "fullName": "Academy Awards",
+    "type": "cinema",
+    "icon": "🏆",
+    "description": "O prêmio mais prestigi­oso do cinema mundial",
+    "color": "from-yellow-500 to-amber-600",
+    "active": true
+  },
+  {
+    "id": "grammy",
+    "name": "Grammy",
+    "fullName": "Grammy Awards",
+    "type": "music",
+    "icon": "🎵",
+    "description": "O maior prêmio da indústria musical americana",
+    "color": "from-purple-500 to-indigo-600",
+    "active": false
+  },
+  {
+    "id": "emmy",
+    "name": "Emmy",
+    "fullName": "Primetime Emmy Awards",
+    "type": "tv",
+    "icon": "📺",
+    "description": "O principal prêmio da televisão americana",
+    "color": "from-blue-500 to-cyan-600",
+    "active": false
+  },
+  {
+    "id": "golden-globes",
+    "name": "Globo de Ouro",
+    "fullName": "Golden Globe Awards",
+    "type": "cinema-tv",
+    "icon": "🌍",
+    "description": "Prêmio de cinema e televisão da Hollywood Foreign Press",
+    "color": "from-yellow-400 to-orange-500",
+    "active": false
+  }
+]
