@@ -120,7 +120,7 @@ function AppInner() {
               </motion.div>
             ) : (
               <motion.div
-                key={activePage}
+                key={activePage + (selectedAward ? selectedAward.id : 'hub')}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
