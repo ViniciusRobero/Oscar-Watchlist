@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
-    "@capacitor/cli": "^8.2.0",
     "@capacitor/core": "^8.2.0",
     "framer-motion": "^11.3.0",
     "lucide-react": "^0.447.0",
@@ -21,6 +20,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.2.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
