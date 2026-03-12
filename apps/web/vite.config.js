@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
-        name: 'Oscar Watchlist',
-        short_name: 'Oscar',
-        description: 'Acompanhe os indicados, faça seus palpites e compare com amigos.',
+        name: 'OscarBET',
+        short_name: 'OscarBET',
+        description: 'Faça seus palpites no Oscar e compare com amigos.',
         theme_color: '#07070f',
         background_color: '#07070f',
         display: 'standalone',

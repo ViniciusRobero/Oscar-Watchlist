@@ -1,4 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="80" fill="#07070f"/>
-  <text x="256" y="340" font-size="300" text-anchor="middle" font-family="Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif">🏆</text>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5C842"/>
+      <stop offset="100%" stop-color="#C48A00"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="90" fill="url(#bg)"/>
+
+  <!-- Oscar statuette silhouette -->
+  <!-- Head -->
+  <ellipse cx="256" cy="82" rx="42" ry="46" fill="#0d0d1a"/>
+
+  <!-- Neck -->
+  <rect x="243" y="124" width="26" height="26" fill="#0d0d1a"/>
+
+  <!-- Upper body (trapezoid) -->
+  <polygon points="176,168 218,150 294,150 336,168 318,292 194,292" fill="#0d0d1a"/>
+
+  <!-- Left arm -->
+  <ellipse cx="158" cy="210" rx="19" ry="52" fill="#0d0d1a"/>
+
+  <!-- Right arm -->
+  <ellipse cx="354" cy="210" rx="19" ry="52" fill="#0d0d1a"/>
+
+  <!-- Lower body -->
+  <rect x="207" y="289" width="98" height="72" rx="6" fill="#0d0d1a"/>
+
+  <!-- Sword crossguard -->
+  <rect x="213" y="357" width="86" height="15" rx="4" fill="#0d0d1a"/>
+
+  <!-- Sword blade -->
+  <rect x="248" y="370" width="16" height="82" rx="3" fill="#0d0d1a"/>
+
+  <!-- Base step -->
+  <rect x="207" y="450" width="98" height="14" rx="3" fill="#0d0d1a"/>
+
+  <!-- Base -->
+  <rect x="185" y="462" width="142" height="32" rx="9" fill="#0d0d1a"/>
 </svg>
