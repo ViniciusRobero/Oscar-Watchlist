@@ -3,17 +3,17 @@
   "version": "6.0.0",
   "private": true,
   "description": "Oscar 2026 Watchlist — v6",
-  "main": "server.js",
+  "main": "apps/api/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev:server": "node server.js",
-    "dev:client": "cd client && npm run dev",
-    "build": "cd client && npm install && npm run build",
+    "start": "node apps/api/server.js",
+    "dev:server": "node apps/api/server.js",
+    "dev:client": "npm --prefix apps/web run dev",
+    "build": "npm --prefix apps/web install && npm --prefix apps/web run build",
     "setup": "npm install && npm run build",
     "test": "jest --detectOpenHandles",
-    "posters": "node scripts/download-posters.js",
-    "posters:force": "node scripts/download-posters.js --force",
-    "new-edition": "node scripts/update-edition.js"
+    "posters": "node apps/api/scripts/download-posters.js",
+    "posters:force": "node apps/api/scripts/download-posters.js --force",
+    "new-edition": "node apps/api/scripts/update-edition.js"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",
@@ -34,9 +34,11 @@
     "supertest": "^7.2.2"
   },
   "jest": {
+    "testMatch": [
+      "**/apps/api/tests/**/*.test.js"
+    ],
     "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/client/"
+      "/node_modules/"
     ]
   }
 }

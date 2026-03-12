@@ -1,8 +1,8 @@
 const express = require('express');
-const { loadCategories } = require('../data/services/editionService');
-const { getOfficialResults, updateOfficialResult } = require('../data/repositories/resultRepository');
-const { getUser } = require('../data/repositories/userRepository');
-const { getPredictionsMap } = require('../data/repositories/predictionRepository');
+const { loadCategories } = require('../services/editionService');
+const { getOfficialResults, updateOfficialResult } = require('../repositories/resultRepository');
+const { getUser } = require('../repositories/userRepository');
+const { getPredictionsMap } = require('../repositories/predictionRepository');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();

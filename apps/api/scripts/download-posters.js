@@ -20,7 +20,7 @@ const crypto = require('crypto');
 
 // Load .env
 try {
-  const envPath = path.join(__dirname, '..', '.env');
+  const envPath = path.resolve(process.cwd(), '.env');
   if (fs.existsSync(envPath)) {
     const lines = fs.readFileSync(envPath, 'utf8').split('\n');
     for (const line of lines) {
@@ -37,8 +37,8 @@ try {
 } catch {}
 
 const FORCE = process.argv.includes('--force');
-const FILMS_PATH = path.join(__dirname, '..', 'data', 'films.json');
-const COVERS_DIR = path.join(__dirname, '..', 'client', 'public', 'assets', 'covers');
+const FILMS_PATH = path.resolve(process.cwd(), 'data', 'films.json');
+const COVERS_DIR = path.join(__dirname, '../../web', 'public', 'assets', 'covers');
 fs.mkdirSync(COVERS_DIR, { recursive: true });
 
 // ── HTTP helpers ──────────────────────────────────────────────────────────────

@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const FILMS_PATH = path.join(__dirname, '..', 'data', 'editions', '2026', 'films.json');
-const COVERS_DIR = path.join(__dirname, '..', 'client', 'public', 'assets', 'covers');
+const FILMS_PATH = path.resolve(process.cwd(), 'data', 'editions', '2026', 'films.json');
+const COVERS_DIR = path.join(__dirname, '../../web', 'public', 'assets', 'covers');
 
 // URLs extracted from browser DOM/network requests on IMDb pages
 const POSTER_URLS = {

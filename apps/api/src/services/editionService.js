@@ -1,8 +1,10 @@
-// data/services/editionService.js — Edition/Award/Film JSON loading
+// apps/api/src/services/editionService.js — Edition/Award/Film JSON loading
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '..');
+// Data lives at the project root /data/. Always resolve from process.cwd()
+// so this works regardless of where this file lives in the source tree.
+const DATA_DIR = path.resolve(process.cwd(), 'data');
 const EDITIONS_DIR = path.join(DATA_DIR, 'editions');
 const EDITIONS_PATH = path.join(DATA_DIR, 'editions.json');
 const AWARDS_PATH = path.join(DATA_DIR, 'awards.json');

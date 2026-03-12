@@ -1,7 +1,7 @@
 {
   "appId": "com.watchlist.oscar",
   "appName": "Oscar Watchlist",
-  "webDir": "client/dist",
+  "webDir": "apps/web/dist",
   "server": {
     "androidScheme": "https"
   },

@@ -13,7 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+const DATA_DIR = path.resolve(process.cwd(), 'data');
 const EDITIONS_DIR = path.join(DATA_DIR, 'editions');
 const EDITIONS_PATH = path.join(DATA_DIR, 'editions.json');
 

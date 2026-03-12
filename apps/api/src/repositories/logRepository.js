@@ -1,5 +1,5 @@
 // data/repositories/logRepository.js — User activity log operations
-const { dbClient } = require('../../config/db');
+const { dbClient } = require('../config/db');
 const crypto = require('crypto');
 
 async function logAction(userId, actionType, entityId, entityType, metadata = {}) {

@@ -1,10 +1,10 @@
 const express = require('express');
-const { getUser, getUserByNick, getUserByEmail, createUser } = require('../data/repositories/userRepository');
-const { hashPassword, verifyPassword } = require('../data/auth');
-const { buildBootstrapAsync, summarizeUsers } = require('../data/services/bootstrapService');
+const { getUser, getUserByNick, getUserByEmail, createUser } = require('../repositories/userRepository');
+const { hashPassword, verifyPassword } = require('../auth');
+const { buildBootstrapAsync, summarizeUsers } = require('../services/bootstrapService');
 const { generateTokensAsync, verifyRefreshAsync, revokeRefreshTokenAsync } = require('../middleware/auth');
 const { checkLockout, recordFail, clearLockout } = require('../lib/bruteForce');
-const { sendWelcomeEmail } = require('../data/services/emailService');
+const { sendWelcomeEmail } = require('../services/emailService');
 
 const router = express.Router();
 

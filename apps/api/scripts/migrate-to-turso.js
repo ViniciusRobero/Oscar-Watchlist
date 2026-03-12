@@ -13,7 +13,7 @@ async function migrate() {
 
     // 1. Criar as tabelas
     console.log(`📦 Aplicando schema...`);
-    const schemaSql = fs.readFileSync(path.join(__dirname, '..', 'data', 'schema.sql'), 'utf8');
+    const schemaSql = fs.readFileSync(path.resolve(process.cwd(), 'data', 'schema.sql'), 'utf8');
 
     // Split schema statements (libsql client execution doesn't like multi-statement strings generically in execute())
     // Let's use executeMultiple if available or split manually
@@ -26,7 +26,7 @@ async function migrate() {
     }
 
     // 2. Ler state.json
-    const statePath = path.join(__dirname, '..', 'data', 'editions', '2026', 'state.json');
+    const statePath = path.resolve(process.cwd(), 'data', 'editions', '2026', 'state.json');
     if (!fs.existsSync(statePath)) {
         console.log(`⚠️ state.json não encontrado. Banco criado apenas com schema vazio.`);
         process.exit(0);

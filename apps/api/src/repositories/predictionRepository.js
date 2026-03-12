@@ -1,5 +1,5 @@
 // data/repositories/predictionRepository.js — User predictions CRUD
-const { dbClient } = require('../../config/db');
+const { dbClient } = require('../config/db');
 const { resolveEdition } = require('../services/editionService');
 
 async function getPredictionsMap(userId, editionId) {

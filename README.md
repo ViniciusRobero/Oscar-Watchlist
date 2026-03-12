@@ -1,471 +1,435 @@
 # 🏆 Oscar Watchlist
 
-Uma aplicação web completa para acompanhar filmes indicados, registrar palpites e visualizar resultados de premiações de cinema, música e televisão. Desenvolvida com Node.js + React, autenticação JWT, banco de dados SQLite/Turso e suporte a mobile via Capacitor.
+> Track every nominated film, register your predictions, and compare results with friends on award night.
+
+A full-stack personal watchlist and prediction tracker built around major award ceremonies — primarily the Academy Awards. Built for personal use, but structured to support multiple users, multiple award shows, and mobile access.
 
 ---
 
-## 📌 O que é o Oscar Watchlist?
+## Overview
 
-O Oscar Watchlist nasceu como uma ferramenta pessoal para acompanhar a temporada de premiações com amigos e família. A ideia é simples: você cria um perfil, marca os filmes que já assistiu, escreve notas rápidas, dá uma nota pessoal — e ainda faz seus palpites para cada categoria antes da cerimônia.
+Oscar Watchlist lets a group of friends:
 
-Depois, quando os vencedores são anunciados, o app calcula automaticamente quem acertou mais entre os participantes, gerando um ranking e comparações detalhadas.
+- **Track** every nominated film — mark as watched, rate it (0–10), add notes
+- **Predict** winners for each category before the ceremony
+- **Compare** predictions with other users
+- **Follow award night live** — see official results and check who got the most right
+- **Explore the timeline** of their activity throughout the season
 
-**É um bolão de premiações + watchlist + diário de cinema, tudo em um só lugar.**
-
----
-
-## ✨ Funcionalidades
-
-### 🎬 Watchlist
-- Lista todos os filmes indicados da edição atual
-- Marque filmes como **assistidos** ou **pendentes**
-- Adicione uma **nota pessoal** (0–10) e um **comentário rápido** (até 600 caracteres)
-- Filtros: Todos / Pendentes / Assistidos
-- Busca por título, plataforma ou categoria
-- Pôsteres carregados automaticamente via TMDB, OMDB, Wikidata ou Wikipedia
-
-### 🔮 Palpites (Bolão)
-- Faça seus palpites para cada categoria antes da cerimônia
-- Atualização otimista: a UI responde imediatamente, sem esperar o servidor
-- Proteção contra condição de corrida: respostas antigas não sobrescrevem palpites mais recentes
-
-### 🌙 Noite da Premiação
-- Visualize as categorias e os indicados em tempo real
-- Administradores registram os vencedores oficiais diretamente na tela
-- Seu placar (acertos / categorias reveladas) é calculado ao vivo
-
-### 👥 Perfis e Comparações
-- Múltiplos perfis por instância da aplicação
-- Cada perfil tem sua watchlist, notas e palpites independentes
-- Compare dois perfis lado a lado: concordâncias e divergências por categoria
-- Veja seu resultado oficial: quantas categorias você acertou
-
-### 🏅 Multi-Premiações
-- Suporte a Oscar, Grammy, Emmy e Globo de Ouro (configurável via `data/awards.json`)
-- Cada premiação tem suas próprias edições (`data/editions.json`)
-- Hub central: quando múltiplas premiações estão ativas, o usuário escolhe qual acessar
-
-### 🔐 Autenticação
-- Registro e login com senha (bcrypt, 12 rounds)
-- JWT de curta duração (15 min) armazenado em memória React — nunca em localStorage
-- Refresh token em cookie HttpOnly (7 dias) — renovação automática transparente
-- Bloqueio de brute force: 5 tentativas falhas → lockout de 15 minutos
-- Perfis privados ou públicos (perfis privados não aparecem na lista geral)
-- Painel de administração para ativar/desativar/deletar usuários
-
-### 📱 Mobile (Capacitor)
-- Build para Android via Capacitor (`@capacitor/android`)
-- Mesma base de código web compilada para APK nativo
-- Viewport configurado para dispositivos móveis (`user-scalable=no, viewport-fit=cover`)
+The app supports multiple award shows (Oscars, Grammys, Emmys, Golden Globes) and multiple editions per show, making it reusable year after year.
 
 ---
 
-## 🛠️ Tecnologias
+## Features
 
-### Backend
-| Tecnologia | Por que foi escolhida |
-|---|---|
-| **Node.js + Express** | Runtime leve, ecossistema maduro, ideal para APIs REST de médio porte |
-| **@libsql/client (Turso/SQLite)** | SQLite para desenvolvimento local; Turso (SQLite na nuvem) para produção sem custo de infraestrutura |
-| **jsonwebtoken** | Padrão JWT: stateless, fácil de validar em qualquer middleware |
-| **bcryptjs** | Hashing de senhas com custo computacional ajustável (rounds=12) |
-| **helmet** | Headers de segurança HTTP com uma linha |
-| **cors** | Controle preciso de origens permitidas |
-| **express-rate-limit** | Rate limiting nativo sem dependência externa de Redis |
-| **cookie-parser** | Leitura de cookies HttpOnly para o refresh token |
+### Watchlist
+- Browse all nominated films for the current edition
+- Mark films as watched / unwatched with one click
+- Rate films on a 0–10 scale
+- Add personal notes (up to 600 characters)
 
-### Frontend
-| Tecnologia | Por que foi escolhida |
-|---|---|
-| **React + Vite** | Vite oferece HMR instantâneo e build de produção extremamente rápido |
-| **TailwindCSS** | CSS utilitário — sem arquivos CSS separados, design system embutido no markup |
-| **Framer Motion** | Animações declarativas com performance nativa (WAAPI) |
-| **Lucide React** | Ícones SVG otimizados, tree-shakeable, consistentes |
+### Predictions
+- Pick a winner for each category from the official nominee list
+- Predictions saved per user, per category, per edition
 
-### Testes
-| Tecnologia | Por que foi escolhida |
-|---|---|
-| **Jest + Supertest** | Testes de integração HTTP reais (sem mocks de rota) para o backend |
-| **Vitest + Testing Library** | Vitest compartilha a config do Vite; Testing Library testa comportamento do usuário, não implementação |
+### Award Night Mode
+- Official results entered by admin → app shows correct/incorrect per category
+- Overall accuracy score and per-category breakdown
+- Admin can enter results manually or trigger automatic sync from Wikipedia / Wikidata
 
-### Mobile
-| Tecnologia | Por que foi escolhida |
-|---|---|
-| **Capacitor** | Converte o app web para APK nativo sem React Native; reutiliza 100% do código existente |
+### User Profiles & Privacy
+- Each user has a `@nick`, first/last name, email, and birth date
+- Users control whether their profile is available for comparison (`is_private` toggle)
+- No public user list — other users are only visible via the predictions comparison feature
+
+### User Comparison
+- Compare your predictions with any non-private user side by side
+
+### Activity Timeline
+- Tracks film watches, ratings, and predictions made throughout the season
+- Visible to the user themselves; visible publicly for non-private users
+
+### Multi-Award Support
+- Awards defined in `data/awards.json` (Oscar, Grammy, Emmy, Golden Globes)
+- Editions defined in `data/editions.json` and `data/editions/{id}/`
+- Hub page shows an award picker when multiple shows are active
+- Currently only Oscar 2026 edition is active
+
+### Admin Panel
+- View all registered users with stats (watched, predictions, ratings)
+- Activate / deactivate users; delete users (cascade)
+- Force-change user passwords; unblock brute-force locked accounts
+- Trigger manual results sync or view last sync log
+
+### Poster System
+- Posters fetched on-demand and cached locally under `apps/web/public/assets/covers/`
+- Source priority: TMDB → OMDB → Wikidata → Wikipedia (no API key required for fallbacks)
+
+### Welcome Email
+- New registrations receive a styled welcome email via Resend (optional, skipped if key absent)
+
+### PWA (Progressive Web App)
+- Installable on Android and iOS from the browser — no app store needed
+- Offline support via service worker (watchlist and predictions cached)
+- Add to Home Screen from Chrome / Safari for app-like experience
+
+### Mobile (Capacitor)
+- Android APK can be built from the React frontend via Capacitor
+- APK uses `VITE_API_URL` to point to the backend server on your local network
 
 ---
 
-## 🏗️ Arquitetura
+## Architecture
 
-### Backend: Repository + Service Layer
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full reference.
 
-O backend segue o padrão **Repository + Service Layer** — sem over-engineering de Clean Architecture completa, mas com separação clara de responsabilidades:
+| Layer | Stack |
+|---|---|
+| Backend | Node.js 20+, Express 4 — `apps/api/` |
+| Frontend | React 18, Vite, TailwindCSS, Framer Motion — `apps/web/` |
+| Database | SQLite (local) or Turso (remote) via `@libsql/client` |
+| Auth | JWT — access token in React memory, refresh token in HttpOnly cookie |
+| Email | Resend SDK (optional) |
+| Mobile | Capacitor + Android |
+
+---
+
+## Repository Structure
 
 ```
 Oscar-Watchlist/
-├── server.js                          # Express setup, middlewares, rotas de poster, SPA fallback (~120 linhas)
-├── config/
-│   └── db.js                          # Criação do cliente Turso (única responsabilidade)
-├── data/
-│   ├── schema.sql                     # DDL do banco de dados
-│   ├── awards.json                    # Definições das premiações (Oscar, Grammy, etc.)
-│   ├── editions.json                  # Edições disponíveis com award_id
-│   ├── editions/
-│   │   └── 2026/
-│   │       ├── films.json             # Filmes indicados da edição
-│   │       └── categories.json        # Categorias e indicados
-│   ├── repositories/                  # Camada de acesso a dados (apenas SQL)
-│   │   ├── userRepository.js          # CRUD de usuários
-│   │   ├── filmRepository.js          # Estados de filme por usuário
-│   │   ├── predictionRepository.js    # Palpites
-│   │   ├── resultRepository.js        # Resultados oficiais
-│   │   └── tokenRepository.js         # Refresh tokens
-│   ├── services/                      # Lógica de negócio e orquestração
-│   │   ├── editionService.js          # I/O de JSON, resolução de edição
-│   │   └── bootstrapService.js        # Dados iniciais do app
-│   └── auth.js                        # Hashing de senhas, migrações de schema
-├── lib/
-│   ├── bruteForce.js                  # Lockout em memória por username
-│   └── poster.js                      # Fetch de pôsteres (TMDB → OMDB → Wikidata → Wikipedia)
-├── middleware/
-│   └── auth.js                        # JWT: generate, verify, revoke, authenticate
-├── routes/                            # Controllers finos (sem lógica de negócio)
-│   ├── auth.js                        # Login, register, refresh, logout
-│   ├── users.js                       # Film states, settings de perfil
-│   ├── predictions.js                 # Salvar/ler palpites
-│   ├── results.js                     # Resultados oficiais, comparações
-│   └── admin.js                       # Gestão de usuários (admin only)
-└── tests/
-    ├── auth.test.js                   # 13 testes: registro, login, cookies, brute force
-    ├── api.test.js                    # 8 testes: endpoints, JWT, admin
-    └── db.test.js                     # 6 testes: CRUD do banco
+├── apps/
+│   ├── api/                     Node/Express backend
+│   │   ├── src/
+│   │   │   ├── config/          DB client factory
+│   │   │   ├── routes/          API routers (auth, users, predictions, results, admin)
+│   │   │   ├── middleware/      JWT auth + role guards
+│   │   │   ├── lib/             bruteForce, poster fetching
+│   │   │   ├── services/        bootstrap, editions, email, results sync
+│   │   │   ├── repositories/    DB CRUD (user, film, prediction, result, token, log)
+│   │   │   └── auth.js          Password helpers + schema migrations
+│   │   ├── tests/               Jest integration tests
+│   │   ├── scripts/             Poster download, edition updater, DB migration
+│   │   └── server.js            Express entry point
+│   └── web/                     React frontend (Vite)
+│       ├── src/
+│       │   ├── api.js           Fetch wrapper + JWT auto-refresh
+│       │   ├── context/         Global state (auth, films, predictions)
+│       │   ├── hooks/           useAuth, useEdition, useFilmState, usePredictions
+│       │   ├── pages/           HubPage, WatchlistPage, PredictionsPage, …
+│       │   └── components/      Layout, MovieCard, MovieModal, Toast
+│       ├── android/             Capacitor Android project
+│       └── package.json
+├── data/                        Static JSON + SQLite DB
+│   ├── awards.json              Award show definitions
+│   ├── editions.json            Edition metadata (year, award_id, current flag)
+│   ├── editions/2026/           Oscar 2026 films, categories, state
+│   └── schema.sql               DB schema reference
+├── docs/
+│   └── ARCHITECTURE.md          Architecture deep-dive
+├── .env                         Secrets (git-ignored)
+├── .env.example                 Environment variable template
+├── capacitor.config.json        Capacitor config (root — webDir: apps/web/dist)
+├── package.json                 Root scripts + backend dependencies
+└── README.md
 ```
-
-**Por que Repository + Service e não MVC ou Clean Architecture?**
-- MVC seria insuficiente — misturaria SQL com lógica de negócio nas rotas
-- Clean Architecture seria over-engineering para este porte (5 routes, ~10 entidades)
-- O padrão escolhido separa SQL (repositories), I/O de arquivo (services) e regras de negócio (auth) sem criar pastas vazias ou interfaces desnecessárias
-
-### Frontend: Context + Custom Hooks
-
-```
-client/src/
-├── App.jsx                    # Roteamento entre Hub → Award → páginas
-├── api.js                     # Fetch wrapper com auto-refresh de token
-├── context/
-│   └── AppContext.jsx          # Estado global: state, dispatch, bootstrap, showToast
-├── hooks/                     # Lógica de domínio encapsulada
-│   ├── useAuth.js              # login, register, logout, restoreSession
-│   ├── useFilmState.js         # getFilmState, updateFilm
-│   ├── usePredictions.js       # savePrediction, setOfficialWinner
-│   └── useEdition.js           # switchEdition
-├── components/
-│   ├── Layout.jsx              # Header, navegação desktop/mobile, dropdown de usuário
-│   ├── MovieCard.jsx           # Card de filme na watchlist
-│   ├── MovieModal.jsx          # Modal com detalhes, rating, notas
-│   ├── CompareRow.jsx          # Linha de comparação de palpites
-│   ├── SkeletonFilmCard.jsx    # Skeleton loading
-│   └── Toast.jsx               # Notificações flutuantes
-├── pages/
-│   ├── HubPage.jsx             # Seleção de premiação (multi-award)
-│   ├── WatchlistPage.jsx       # Lista de filmes com filtros e busca
-│   ├── PredictionsPage.jsx     # Palpites por categoria
-│   ├── OscarNightPage.jsx      # Resultados ao vivo
-│   ├── ComparePage.jsx         # Comparação entre perfis
-│   └── UsersPage.jsx           # Gestão de perfis e autenticação
-├── utils/
-│   ├── safeUrl.js              # Sanitização de URLs externas
-│   └── compareReport.js        # Lógica de relatório de comparação
-└── test/
-    ├── helpers/
-    │   └── mockAppContext.jsx  # Provider mock para testes
-    ├── components/             # Testes de componentes
-    ├── pages/                  # Testes de páginas
-    ├── context/                # Testes do reducer
-    └── utils/                  # Testes de utilitários
-```
-
-**Por que Context + Custom Hooks e não Redux ou Zustand?**
-- O estado global é simples (um objeto, um reducer): Redux seria boilerplate excessivo
-- Custom hooks encapsulam lógica de domínio sem acoplar ao AppContext
-- Hooks são testáveis de forma independente via mock do contexto
 
 ---
 
-## 🔒 Segurança
+## Getting Started
 
-| Mecanismo | Implementação |
-|---|---|
-| Senhas | bcryptjs (rounds=12); fallback para PBKDF2 legado |
-| Access Token | JWT em memória React (15 min); **nunca** em localStorage |
-| Refresh Token | Cookie HttpOnly, Secure, SameSite (7 dias); rotacionado a cada renovação |
-| Brute Force | Lockout de 15 min após 5 tentativas falhas (por username, in-memory) |
-| Rate Limiting | Login: 10 req/min; Registro: 5 req/min |
-| Headers HTTP | Helmet (X-Frame-Options, CSP, HSTS, etc.) |
-| CORS | Origens explicitamente configuradas via `CORS_ORIGIN` |
+### Prerequisites
 
----
+- **Node.js** 20+ — `node -v`
+- **npm** 9+
+- *(Android builds only)* Android Studio + Java 17+
 
-## ⚙️ Como Rodar Localmente
-
-### Pré-requisitos
-- Node.js v18 ou superior
-
-### Instalação completa (primeira vez)
+### 1. Clone & Install
 
 ```bash
-# Clone o repositório
-git clone <url-do-repositorio>
+git clone https://github.com/ViniciusRobero/Oscar-Watchlist.git
 cd Oscar-Watchlist
-
-# Instala dependências e compila o frontend
-npm run setup
+npm install           # backend dependencies
+npm run build         # installs frontend deps + produces apps/web/dist/
 ```
 
-### Variáveis de ambiente (opcional)
+### 2. Configure Environment
 
-Crie um arquivo `.env` na raiz do projeto:
-
-```env
-# Banco de dados (padrão: arquivo local SQLite)
-TURSO_URL=file:data/local.db
-TURSO_AUTH_TOKEN=            # Somente para Turso na nuvem
-
-# Pôsteres em alta qualidade (sem chave = Wikipedia, com chave = qualidade superior)
-TMDB_API_KEY=3fda102d660d05b1fff1224bfa108edd
-OMDB_API_KEY=3fda102d660d05b1fff1224bfa108edd  # Alternativa ao TMDB
-
-# Segurança JWT (mude em produção!)
-JWT_SECRET=seu-segredo-aqui
-JWT_REFRESH_SECRET=seu-segredo-refresh-aqui
-
-# CORS (para produção com domínio separado)
-CORS_ORIGIN=https://seudominio.com
-
-# Porta do servidor
-PORT=3000
-
-# Conta admin padrão
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=admin123
+```bash
+cp .env.example .env
+# The defaults work for local development with no changes required.
+# Add TMDB_API_KEY for better poster quality (optional but recommended).
 ```
 
-### Iniciar o servidor
+### 3. Run — Production Mode
 
 ```bash
 npm start
+# → http://localhost:3000
 ```
 
-Acesse: **http://localhost:3000**
-
-### Modo desenvolvimento (hot-reload no frontend)
+### 4. Run — Development Mode (hot reload)
 
 ```bash
-# Terminal 1 — Backend
+# Terminal 1 — backend
 npm run dev:server
 
-# Terminal 2 — Frontend (Vite dev server em http://localhost:5173)
+# Terminal 2 — frontend (Vite dev server + proxy)
 npm run dev:client
+# → http://localhost:5173
 ```
+
+### 5. Default Admin Account
+
+On first startup the server creates:
+- **nick / login**: `admin`
+- **password**: `admin`
+
+Change the password via the admin panel after first login.
 
 ---
 
-## 🧪 Testes
+## Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `TURSO_URL` | `file:data/local.db` | SQLite / Turso database URL |
+| `TURSO_AUTH_TOKEN` | — | Auth token for remote Turso |
+| `JWT_SECRET` | dev string | Access token signing key — **change in production** |
+| `JWT_REFRESH_SECRET` | dev string | Refresh token signing key — **change in production** |
+| `PORT` | `3000` | HTTP port |
+| `NODE_ENV` | `development` | `development` or `production` |
+| `CORS_ORIGIN` | `http://localhost:5173` | Comma-separated allowed CORS origins |
+| `TMDB_API_KEY` | — | TMDB key for high-quality posters (optional) |
+| `OMDB_API_KEY` | — | OMDB key — poster fallback (optional) |
+| `RESEND_API_KEY` | — | Resend key — welcome emails (optional) |
+| `EMAIL_FROM` | — | Sender address (requires verified domain in Resend) |
+| `RESULTS_SYNC_CRON` | `*/15 22,23,0,1,2,3,4,5 * 3 0,1` | Cron for Oscar night auto-sync (UTC) |
+| `NEWS_API_KEY` | — | NewsAPI key — headlines in admin sync panel (optional) |
+
+Full documentation: [.env.example](.env.example)
+
+---
+
+## API Overview
+
+All routes under `/api`. Auth uses `Authorization: Bearer <accessToken>`.
+
+### Authentication — `/api/auth`
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/login` | Login with nick + password |
+| `POST` | `/register` | Register new user |
+| `POST` | `/refresh` | Renew access token via HttpOnly cookie |
+| `POST` | `/logout` | Revoke session |
+
+### Users — `/api/users`
+| Method | Path | Auth |
+|---|---|---|
+| `GET` | `/:nick/timeline` | Optional |
+| `PATCH` | `/:username/films/:filmId` | Required |
+| `PATCH` | `/:username/settings` | Required |
+
+### Predictions — `/api/predictions`
+| Method | Path | Auth |
+|---|---|---|
+| `PATCH` | `/:username/:categoryId` | Required |
+
+### Results — `/api/results`
+| Method | Path | Auth |
+|---|---|---|
+| `PATCH` | `/official/:categoryId` | Admin |
+| `GET` | `/compare/users?left=&right=` | Public |
+| `GET` | `/compare/official/:username` | Public |
+
+### Data — `/api`
+| Method | Path |
+|---|---|
+| `GET` | `/bootstrap?username=&edition=` |
+| `GET` | `/awards` |
+| `GET` | `/editions` |
+| `GET` | `/films?edition=` |
+| `GET` | `/categories?edition=` |
+| `GET` | `/poster/:filmId?edition=` |
+
+### Admin — `/api/admin` *(admin only)*
+| Method | Path |
+|---|---|
+| `GET` | `/users?edition=` |
+| `PATCH` | `/users/:username/status` |
+| `DELETE` | `/users/:username` |
+| `PATCH` | `/users/:nick/password` |
+| `POST` | `/users/:username/unblock` |
+| `POST` | `/results/sync` |
+| `GET` | `/results/sync/status` |
+
+---
+
+## Data Model
+
+### Database Tables
+
+| Table | Purpose |
+|---|---|
+| `users` | Accounts — nick (unique), email, role, is_private, profile fields |
+| `user_film_states` | Watch status, rating (0–10), notes per user/film/edition |
+| `user_predictions` | Category predictions per user/edition |
+| `official_results` | Official winners per category/edition |
+| `refresh_tokens` | JWT refresh token revocation store |
+| `user_logs` | Activity audit log (watches, ratings, predictions) |
+
+### JSON Files
+
+| File | Purpose |
+|---|---|
+| `data/awards.json` | Award show definitions (id, name, type, active) |
+| `data/editions.json` | Editions with `award_id` reference and `current` flag |
+| `data/editions/{id}/films.json` | Films with TMDB ID, title, director, poster URL |
+| `data/editions/{id}/categories.json` | Categories with nominee arrays |
+
+---
+
+## PWA — Install on Mobile
+
+The app is a full PWA. No APK needed for most use cases.
+
+1. Open the app URL in Chrome (Android) or Safari (iOS)
+2. Tap **"Add to Home Screen"** / **"Install App"** from the browser menu
+3. The app installs with offline support and a native-like experience
+
+---
+
+## Mobile / Capacitor (APK)
 
 ```bash
-# Backend (Jest + Supertest) — 30 testes
-npm test
-
-# Frontend (Vitest + Testing Library) — 76 testes
-cd client && npm test
-
-# Modo watch (frontend)
-cd client && npx vitest
+# From apps/web/
+npm run cap:sync     # build React + sync to Android project
+npm run cap:open     # open Android Studio
+npm run cap:run      # run on connected device / emulator
 ```
 
-### O que é testado
+### APK — Connect to Backend
 
-**Backend (30 testes):**
-- Registro, login, cookie de refresh, renovação de token, logout
-- Brute force lockout (após 5 tentativas)
-- Hashing bcrypt e fallback PBKDF2 legado
-- Proteção JWT em endpoints protegidos
-- Permissões de admin
-- CRUD completo de usuários, film states, palpites, resultados oficiais
-
-**Frontend (76 testes):**
-- Reducer do AppContext (10)
-- MovieCard, MovieModal, Toast, CompareRow (20)
-- WatchlistPage: filtros, busca, empty state (5)
-- PredictionsPage: login prompt, listagem de categorias (4)
-- OscarNightPage: score ao vivo, listagem (4)
-- ComparePage: seleção de usuários, comparação (8)
-- Utilitários: safeUrl, compareReport (25)
-
----
-
-## 📱 Build para Android (APK)
-
-```bash
-cd client
-
-# 1. Compilar o frontend
-npm run build
-
-# 2. Sincronizar com Capacitor
-npm run cap:sync
-
-# 3. Abrir no Android Studio
-npm run cap:open
-
-# Ou executar direto no dispositivo conectado
-npm run cap:run
-```
-
----
-
-## 🗂️ Adicionando uma Nova Edição
-
-```bash
-# Script interativo
-npm run new-edition
-```
-
-Ou manualmente:
-1. Adicione a entrada em `data/editions.json` com `"current": true`
-2. Crie a pasta `data/editions/{id}/`
-3. Adicione `films.json` e `categories.json` nessa pasta
-
-### Estrutura de `categories.json`
-
-```json
-[
-  {
-    "id": "melhor-filme",
-    "name": "Melhor Filme",
-    "highlight": true,
-    "nominees": [
-      {
-        "id": "nom-oppenheimer",
-        "filmId": "oppenheimer",
-        "nomineeName": null
-      }
-    ]
-  }
-]
-```
-
-> O campo `nomineeName` é usado em categorias de performance (Melhor Ator, etc.) onde o indicado é uma pessoa, não o filme inteiro.
-
-### Estrutura de `films.json`
-
-```json
-[
-  {
-    "id": "oppenheimer",
-    "title": "Oppenheimer",
-    "year": 2023,
-    "director": "Christopher Nolan",
-    "nominations": 13,
-    "imdbRating": "8.9",
-    "poster": null,
-    "availabilityStatus": "available",
-    "watchLinks": [
-      { "label": "Netflix", "url": "https://netflix.com/..." }
-    ]
-  }
-]
-```
-
----
-
-## 🌐 Deploy em Produção
-
-### Variáveis obrigatórias em produção
+The APK bundles the frontend but must reach the backend server over the network.
+Create `apps/web/.env.local` before building:
 
 ```env
-NODE_ENV=production
-TURSO_URL=libsql://seu-banco.turso.io
-TURSO_AUTH_TOKEN=seu-token-turso
-JWT_SECRET=segredo-longo-e-aleatorio-min-32-chars
-JWT_REFRESH_SECRET=outro-segredo-longo-e-diferente
-ADMIN_PASSWORD=senha-forte-do-admin
-CORS_ORIGIN=https://seudominio.com
+# Replace with your machine's local network IP
+VITE_API_URL=http://192.168.1.100:3000
 ```
 
-### Pôsteres em produção
-
-Os pôsteres são baixados automaticamente na inicialização do servidor e salvos em `client/public/assets/covers/`. Para forçar o re-download:
+Then rebuild and sync:
 
 ```bash
-npm run posters          # Baixa somente pôsteres faltando
-npm run posters:force    # Re-baixa todos os pôsteres
+cd apps/web
+npm run cap:sync
 ```
 
-Fontes de pôsteres (em ordem de prioridade):
-1. **TMDB** (requer `TMDB_API_KEY`) — maior qualidade
-2. **OMDB** (requer `OMDB_API_KEY`) — alternativa
-3. **Wikidata** — público, sem chave
-4. **Wikipedia** — fallback final, sem chave
+> The server must be running and reachable on your local network.
+> Android 9+ requires HTTPS for cleartext HTTP — use the same Wi-Fi network or set up a reverse proxy with HTTPS.
+
+- Config: `apps/web/capacitor.config.json`
+- Root `capacitor.config.json` has `webDir: "apps/web/dist"`
 
 ---
 
-## 📊 Banco de Dados
+## Testing
 
-### Tabelas
+### Backend — Jest + Supertest
 
-| Tabela | Descrição |
-|---|---|
-| `users` | username, password_hash, role (user/admin), is_active, is_private |
-| `user_film_states` | Estado por filme por usuário: watched, personal_rating, personal_notes |
-| `user_predictions` | Palpites: user_id + category_id + edition → nominee_id |
-| `official_results` | Vencedores oficiais por categoria e edição (somente admin) |
-| `refresh_tokens` | Tokens de refresh: hash SHA-256, TTL, flag de revogação |
-
-### Conta admin padrão
-
-Na primeira inicialização, um usuário `admin` é criado automaticamente com a senha definida em `ADMIN_PASSWORD` (padrão: `admin123`). **Troque a senha imediatamente em produção.**
-
----
-
-## 🏆 Multi-Premiações
-
-O app suporta múltiplas premiações configuradas em `data/awards.json`:
-
-| Premiação | ID | Status padrão |
-|---|---|---|
-| Oscar (Academy Awards) | `oscar` | ativo |
-| Grammy Awards | `grammy` | inativo |
-| Emmy Awards | `emmy` | inativo |
-| Globo de Ouro | `golden-globes` | inativo |
-
-Para ativar uma premiação, defina `"active": true` no `awards.json` e adicione as edições correspondentes em `editions.json` com o `award_id` correto.
-
----
-
-## 🔄 Fluxo de Autenticação JWT
-
-```
-Usuário faz login
-       ↓
-Servidor retorna:
-  • accessToken (JWT 15min) → armazenado em memória React
-  • refreshToken (JWT 7d)   → cookie HttpOnly oscar_refresh
-       ↓
-Request autenticado:
-  Authorization: Bearer <accessToken>
-       ↓
-Token expira (15min) → api.js intercepta 401
-       ↓
-POST /api/auth/refresh (cookie enviado automaticamente pelo browser)
-       ↓
-Novo accessToken + novo refreshToken (rotação automática)
-       ↓
-Request original é repetido com o novo token
+```bash
+npm test                                      # all 38 tests
+npm test -- --testPathPattern=auth            # single suite
 ```
 
+Each test suite creates its own isolated SQLite DB in `data/`.
+
+### Frontend — Vitest + Testing Library
+
+```bash
+cd apps/web
+npm test          # watch mode
+npm run test:run  # single run
+```
+
+Tests live in `apps/web/src/test/` — components, context, pages, helpers.
+
 ---
 
-## 📝 Licença
+## Troubleshooting
 
-Projeto pessoal — uso livre para fins educacionais e não comerciais.
+**Port already in use**
+```bash
+npx kill-port 3000
+```
+
+**Blank page / module not found after pulling**
+```bash
+npm install && npm run build
+```
+
+**Posters not loading**
+Adding `TMDB_API_KEY` to `.env` gives best results. Run `npm run posters:force` to force re-download all posters.
+
+**Locked out of account**
+5 failed logins trigger a 15-minute lockout. Admin can unblock from the admin panel → Users → Unblock.
+
+**JWT errors / unable to login**
+Clear browser cookies for `localhost:3000`.
+
+**Email not arriving**
+Without a verified Resend domain, use `EMAIL_FROM=onboarding@resend.dev` — emails only go to the Resend account owner's email. No `RESEND_API_KEY` = emails silently skipped.
+
+**CORS error in dev**
+Confirm `CORS_ORIGIN=http://localhost:5173` in `.env` and that `npm run dev:client` is running on port 5173.
+
+---
+
+## Security Notes
+
+- Access tokens stored only in React state — never in `localStorage`
+- Refresh tokens: HttpOnly + Secure cookie + DB revocation (7-day expiry)
+- Passwords: bcryptjs 12 rounds; legacy PBKDF2 hashes supported for backward compatibility
+- Brute force: 5 failures → 15-minute lockout per nick (in-memory)
+- Rate limiting: 10 req/min login, 5 req/min register
+- All DB queries use parameterized statements — no SQL injection
+- Always set random 64-char `JWT_SECRET` and `JWT_REFRESH_SECRET` in production
+
+---
+
+## Roadmap
+
+### Short-term
+- [ ] Predictions export as CSV
+- [ ] Persistent session opt-in (remember me)
+- [ ] Better mobile UI polish
+
+### Medium-term
+- [ ] Prediction lock deadline — freeze predictions N hours before ceremony
+- [ ] Friend groups / private prediction pools
+- [ ] Ranking history across editions
+- [ ] Email reminders before ceremony
+- [ ] PWA support (installable, offline-capable)
+
+### Long-term
+- [ ] Grammy, Emmy, Golden Globes editions fully populated
+- [ ] Historical archive (pre-2026 editions)
+- [ ] Analytics dashboards (accuracy trends, category difficulty)
+- [ ] Internationalization (PT/EN)
+- [ ] Richer social features (comments, reactions)
+
+---
+
+## Notes for Future Contributors and AI Agents
+
+- Run `npm test` before any commit — all 38 tests must pass
+- `data/` at project root is **runtime data**, not source code
+- `editionService.js` uses `process.cwd()` to resolve `data/` — keep this as-is
+- Backend uses CommonJS (`require`); frontend uses ESM (`import`) — do not mix
+- When moving files, always update `require()` paths and verify with `npm test`
+- To add a new edition: `npm run new-edition` (interactive CLI script)
+- Do not change DB column names or JSON keys without a migration plan
+
+---
+
+*Built with Node.js + React + SQLite. Personal project for Oscar season.*

@@ -1,10 +1,10 @@
 const express = require('express');
 const { authenticate, requireAdmin } = require('../middleware/auth');
-const { listAllUsers, getUser, getUserByNick, setUserActive, deleteUser, updateUserSettings } = require('../data/repositories/userRepository');
-const { summarizeUsers } = require('../data/services/bootstrapService');
+const { listAllUsers, getUser, getUserByNick, setUserActive, deleteUser, updateUserSettings } = require('../repositories/userRepository');
+const { summarizeUsers } = require('../services/bootstrapService');
 const { clearLockout, listLocked } = require('../lib/bruteForce');
-const { hashPassword } = require('../data/auth');
-const { syncResults, getSyncLog } = require('../data/services/resultsImporter');
+const { hashPassword } = require('../auth');
+const { syncResults, getSyncLog } = require('../services/resultsImporter');
 
 const router = express.Router();
 

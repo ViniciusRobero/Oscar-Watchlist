@@ -1,7 +1,7 @@
 // data/auth.js — Password hashing and schema migrations
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { dbClient } = require('../config/db');
+const { dbClient } = require('./config/db');
 const { getUser } = require('./repositories/userRepository');
 
 const BCRYPT_ROUNDS = 12;

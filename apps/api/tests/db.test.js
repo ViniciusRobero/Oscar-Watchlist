@@ -1,25 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 
-process.env.TURSO_URL = `file:${path.join(__dirname, '..', 'data', 'test_db.db')}`;
+process.env.TURSO_URL = `file:${path.join(process.cwd(), 'data', 'test_db.db')}`;
 
-const { dbClient } = require('../config/db');
-const { migrateSchema } = require('../data/auth');
-const { createUser, getUser, getUserByNick, getUserByEmail, ensureUserAsync } = require('../data/repositories/userRepository');
-const { getFilmState, updateFilmState } = require('../data/repositories/filmRepository');
-const { updatePrediction, getPredictionsMap } = require('../data/repositories/predictionRepository');
-const { getOfficialResults, updateOfficialResult } = require('../data/repositories/resultRepository');
-const { summarizeUsers } = require('../data/services/bootstrapService');
+const { dbClient } = require('../src/config/db');
+const { migrateSchema } = require('../src/auth');
+const { createUser, getUser, getUserByNick, getUserByEmail, ensureUserAsync } = require('../src/repositories/userRepository');
+const { getFilmState, updateFilmState } = require('../src/repositories/filmRepository');
+const { updatePrediction, getPredictionsMap } = require('../src/repositories/predictionRepository');
+const { getOfficialResults, updateOfficialResult } = require('../src/repositories/resultRepository');
+const { summarizeUsers } = require('../src/services/bootstrapService');
 
 const TEST_EDITION = '__test_db__';
-const TEST_DIR = path.join(__dirname, '..', 'data', 'editions', TEST_EDITION);
+const TEST_DIR = path.join(process.cwd(), 'data', 'editions', TEST_EDITION);
 
 beforeAll(async () => {
     fs.mkdirSync(TEST_DIR, { recursive: true });
     fs.writeFileSync(path.join(TEST_DIR, 'films.json'), '[]');
     fs.writeFileSync(path.join(TEST_DIR, 'categories.json'), '[]');
 
-    const schemaSql = fs.readFileSync(path.join(__dirname, '..', 'data', 'schema.sql'), 'utf8');
+    const schemaSql = fs.readFileSync(path.join(process.cwd(), 'data', 'schema.sql'), 'utf8');
     await dbClient.executeMultiple(schemaSql);
     await migrateSchema();
 });
@@ -27,7 +27,7 @@ beforeAll(async () => {
 afterAll(async () => {
     fs.rmSync(TEST_DIR, { recursive: true, force: true });
     try {
-        fs.unlinkSync(path.join(__dirname, '..', 'data', 'test_db.db'));
+        fs.unlinkSync(path.join(process.cwd(), 'data', 'test_db.db'));
     } catch (e) { }
 });
 

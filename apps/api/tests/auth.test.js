@@ -2,22 +2,22 @@ const fs = require('fs');
 const path = require('path');
 const request = require('supertest');
 
-process.env.TURSO_URL = `file:${path.join(__dirname, '..', 'data', 'test_auth.db')}`;
+process.env.TURSO_URL = `file:${path.join(process.cwd(), 'data', 'test_auth.db')}`;
 const app = require('../server');
-const { dbClient } = require('../config/db');
-const { migrateSchema, hashPassword, verifyPassword } = require('../data/auth');
-const { createUser, getUser, getUserByNick, setUserActive, updateUserSettings } = require('../data/repositories/userRepository');
-const { summarizeUsers } = require('../data/services/bootstrapService');
+const { dbClient } = require('../src/config/db');
+const { migrateSchema, hashPassword, verifyPassword } = require('../src/auth');
+const { createUser, getUser, getUserByNick, setUserActive, updateUserSettings } = require('../src/repositories/userRepository');
+const { summarizeUsers } = require('../src/services/bootstrapService');
 
 const TEST_EDITION = '__test_auth__';
-const TEST_DIR = path.join(__dirname, '..', 'data', 'editions', TEST_EDITION);
+const TEST_DIR = path.join(process.cwd(), 'data', 'editions', TEST_EDITION);
 
 beforeAll(async () => {
     fs.mkdirSync(TEST_DIR, { recursive: true });
     fs.writeFileSync(path.join(TEST_DIR, 'films.json'), '[]');
     fs.writeFileSync(path.join(TEST_DIR, 'categories.json'), '[]');
 
-    const schemaSql = fs.readFileSync(path.join(__dirname, '..', 'data', 'schema.sql'), 'utf8');
+    const schemaSql = fs.readFileSync(path.join(process.cwd(), 'data', 'schema.sql'), 'utf8');
     await dbClient.executeMultiple(schemaSql);
     await migrateSchema();
 
@@ -33,7 +33,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
     fs.rmSync(TEST_DIR, { recursive: true, force: true });
-    try { fs.unlinkSync(path.join(__dirname, '..', 'data', 'test_auth.db')); } catch (e) { }
+    try { fs.unlinkSync(path.join(process.cwd(), 'data', 'test_auth.db')); } catch (e) { }
 });
 
 describe('Auth API Endpoints', () => {

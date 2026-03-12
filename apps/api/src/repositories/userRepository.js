@@ -1,5 +1,5 @@
 // data/repositories/userRepository.js — User CRUD operations
-const { dbClient } = require('../../config/db');
+const { dbClient } = require('../config/db');
 
 function rowToUser(row) {
   return {

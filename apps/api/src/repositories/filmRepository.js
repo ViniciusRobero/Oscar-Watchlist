@@ -1,5 +1,5 @@
 // data/repositories/filmRepository.js — Film state CRUD
-const { dbClient } = require('../../config/db');
+const { dbClient } = require('../config/db');
 const { resolveEdition } = require('../services/editionService');
 
 async function getFilmState(userId, filmId, editionId) {

@@ -4,7 +4,7 @@ const { getUser } = require('../repositories/userRepository');
 const { getUserFilmsMap } = require('../repositories/filmRepository');
 const { getPredictionsMap } = require('../repositories/predictionRepository');
 const { getOfficialResults } = require('../repositories/resultRepository');
-const { dbClient } = require('../../config/db');
+const { dbClient } = require('../config/db');
 
 /**
  * @param {string} editionId

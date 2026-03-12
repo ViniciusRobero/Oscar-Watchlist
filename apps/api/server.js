@@ -1,8 +1,8 @@
-// Load .env if present
+// Load .env from project root
 try {
   const fs = require('fs');
   const path = require('path');
-  const envPath = path.join(__dirname, '.env');
+  const envPath = path.resolve(process.cwd(), '.env');
   if (fs.existsSync(envPath)) {
     const lines = fs.readFileSync(envPath, 'utf8').split('\n');
     for (const line of lines) {
@@ -26,21 +26,21 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
-const { loadFilms, loadCategories, loadEditions, loadAwards } = require('./data/services/editionService');
-const { buildBootstrapAsync } = require('./data/services/bootstrapService');
-const { migrateSchema, ensureDefaultAdmin } = require('./data/auth');
-const { fetchPosterUrl, downloadFile, updateFilmPosterUrl, prefetchAllPosters } = require('./lib/poster');
-const { syncResults } = require('./data/services/resultsImporter');
+const { loadFilms, loadCategories, loadEditions, loadAwards } = require('./src/services/editionService');
+const { buildBootstrapAsync } = require('./src/services/bootstrapService');
+const { migrateSchema, ensureDefaultAdmin } = require('./src/auth');
+const { fetchPosterUrl, downloadFile, updateFilmPosterUrl, prefetchAllPosters } = require('./src/lib/poster');
+const { syncResults } = require('./src/services/resultsImporter');
 
-const usersRouter = require('./routes/users');
-const predictionsRouter = require('./routes/predictions');
-const resultsRouter = require('./routes/results');
-const authRouter = require('./routes/auth');
-const adminRouter = require('./routes/admin');
+const usersRouter = require('./src/routes/users');
+const predictionsRouter = require('./src/routes/predictions');
+const resultsRouter = require('./src/routes/results');
+const authRouter = require('./src/routes/auth');
+const adminRouter = require('./src/routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const COVERS_DIR = path.join(__dirname, 'client', 'public', 'assets', 'covers');
+const COVERS_DIR = path.join(__dirname, '../web/public/assets/covers');
 
 // ── Security Middleware ──────────────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
@@ -55,9 +55,9 @@ app.use(cors({
 
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
-app.use(express.static(path.join(__dirname, 'client', 'dist')));
-app.use('/assets', express.static(path.join(__dirname, 'client', 'public', 'assets')));
-app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
+app.use(express.static(path.join(__dirname, '../web/dist')));
+app.use('/assets', express.static(path.join(__dirname, '../web/public/assets')));
+app.use('/assets', express.static(path.join(__dirname, '../../public/assets')));
 
 // ── Rate limiters ────────────────────────────────────────────────────────────
 const authLimiter = rateLimit({ windowMs: 60000, max: 10, standardHeaders: true, legacyHeaders: false, message: { error: 'Muitas tentativas. Tente novamente em 1 minuto.' } });
@@ -125,7 +125,7 @@ app.use((err, _req, res, _next) => {
 
 // ── SPA fallback ─────────────────────────────────────────────────────────────
 app.get('*', (_req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../web/dist/index.html'));
 });
 
 // ── Startup ──────────────────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 const crypto = require('crypto');
-const { resolveEdition, loadFilms, saveFilms } = require('../data/services/editionService');
+const { resolveEdition, loadFilms, saveFilms } = require('../services/editionService');
 
 const MAX_DOWNLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
 

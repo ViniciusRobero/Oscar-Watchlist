@@ -1,5 +1,5 @@
 // data/repositories/resultRepository.js — Official results CRUD
-const { dbClient } = require('../../config/db');
+const { dbClient } = require('../config/db');
 const { resolveEdition } = require('../services/editionService');
 
 async function getOfficialResults(editionId) {

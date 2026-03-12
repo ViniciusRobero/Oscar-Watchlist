@@ -23,7 +23,7 @@ const path = require('path');
 const TMDB_KEY = process.env.TMDB_API_KEY;
 const OMDB_KEY = process.env.OMDB_API_KEY;
 
-const FILMS_PATH = path.join(__dirname, '../data/films.json');
+const FILMS_PATH = path.resolve(process.cwd(), 'data/films.json');
 const COVERS_DIR = path.join(__dirname, '../public/assets/covers');
 
 // ── HTTP helpers ─────────────────────────────────────────────────────────────

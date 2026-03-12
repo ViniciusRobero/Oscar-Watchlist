@@ -1,5 +1,14 @@
 {
   "appId": "com.viniciusrobero.oscarwatchlist",
   "appName": "Oscar Watchlist",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
 }

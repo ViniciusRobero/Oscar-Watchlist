@@ -1,3 +1,8 @@
+// ── API base URL ─────────────────────────────────────────────────────────────
+// Empty in web (relative URLs). Set VITE_API_URL for Capacitor APK builds.
+// Example: VITE_API_URL=http://192.168.1.100:3000
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 // ── Edition state ────────────────────────────────────────────────────────────
 let _currentEdition = '';
 
@@ -43,14 +48,14 @@ async function request(url, options = {}) {
   }
 
   // credentials: 'include' sends the HttpOnly refresh cookie automatically
-  let res = await fetch(appendEdition(url), { ...options, headers, credentials: 'include' });
+  let res = await fetch(API_BASE + appendEdition(url), { ...options, headers, credentials: 'include' });
 
   // If 401 and not already retrying, try to refresh via cookie
   if (res.status === 401 && !options._isRetry) {
     const refreshed = await tryRefresh();
     if (refreshed) {
       headers['Authorization'] = `Bearer ${_accessToken}`;
-      res = await fetch(appendEdition(url), { ...options, headers, credentials: 'include', _isRetry: true });
+      res = await fetch(API_BASE + appendEdition(url), { ...options, headers, credentials: 'include', _isRetry: true });
     }
   }
 
@@ -67,7 +72,7 @@ async function tryRefresh() {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
       // The browser sends the HttpOnly cookie automatically via credentials: 'include'
-      const res = await fetch('/api/auth/refresh', {
+      const res = await fetch(API_BASE + '/api/auth/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -128,7 +133,7 @@ export const api = {
   // Logout — clears cookie on server
   logout: async () => {
     try {
-      await fetch('/api/auth/logout', {
+      await fetch(API_BASE + '/api/auth/logout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

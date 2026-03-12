@@ -1,5 +1,5 @@
 // data/repositories/tokenRepository.js — Refresh token management
-const { dbClient } = require('../../config/db');
+const { dbClient } = require('../config/db');
 
 async function getRefreshToken(tokenHash) {
   const rs = await dbClient.execute({

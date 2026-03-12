@@ -1,9 +1,9 @@
 const express = require('express');
-const { getUser, getUserByNick, getUserByEmail, updateUserSettings } = require('../data/repositories/userRepository');
-const { updateFilmState } = require('../data/repositories/filmRepository');
-const { getUserTimeline } = require('../data/repositories/logRepository');
-const { hashPassword, verifyPassword } = require('../data/auth');
-const { buildBootstrapAsync } = require('../data/services/bootstrapService');
+const { getUser, getUserByNick, getUserByEmail, updateUserSettings } = require('../repositories/userRepository');
+const { updateFilmState } = require('../repositories/filmRepository');
+const { getUserTimeline } = require('../repositories/logRepository');
+const { hashPassword, verifyPassword } = require('../auth');
+const { buildBootstrapAsync } = require('../services/bootstrapService');
 const { authenticate, optionalAuth, requireSameUserOrAdmin, requireSameNickOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -68,7 +68,7 @@ router.patch('/:username/films/:filmId', authenticate, requireSameUserOrAdmin, a
     const fs = await updateFilmState(username, filmId, edition, updates);
 
     // Log film activity (fire-and-forget)
-    const { logAction } = require('../data/repositories/logRepository');
+    const { logAction } = require('../repositories/logRepository');
     if (updates.watched === true) {
       logAction(user.id, 'film_watch', filmId, 'film', { edition }).catch(() => {});
     }
