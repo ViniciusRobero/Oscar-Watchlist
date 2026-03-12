@@ -16,7 +16,7 @@ const REFRESH_COOKIE_OPTS = {
   httpOnly: true,
   secure: IS_PROD,
   sameSite: IS_PROD ? 'Strict' : 'Lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+  // No maxAge → session cookie: expires when browser closes
   path: '/api/auth',
 };
 

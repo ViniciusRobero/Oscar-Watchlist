@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   PlusCircle, LogIn, Star, Trophy, Eye, Lock, EyeOff,
   AlertCircle, Shield, UserX, UserCheck, Unlock, Trash2, Globe, Key,
-  User, Mail, Calendar, AtSign,
+  User, Mail, Calendar, AtSign, RefreshCw, CheckCircle, XCircle, Newspaper,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import { useAuth } from '../hooks/useAuth.js';
@@ -399,6 +399,120 @@ function RegisterForm({ onRegister }) {
   );
 }
 
+// ── Results Sync Panel ────────────────────────────────────────────────────────
+
+function SyncPanel() {
+  const { showToast } = useApp();
+  const [loading, setLoading] = useState(false);
+  const [log, setLog] = useState(null);
+
+  async function handleSync() {
+    setLoading(true);
+    try {
+      const data = await api.admin.syncResults();
+      setLog(data.log);
+      if (data.log?.matched?.length) {
+        showToast(`${data.log.matched.length} resultado(s) importado(s) — fonte: ${data.log.source}`);
+      } else {
+        showToast('Nenhum resultado encontrado ainda.', 'error');
+      }
+    } catch (e) {
+      showToast(e.message || 'Erro ao sincronizar.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const SOURCE_LABEL = { wikipedia: 'Wikipedia', wikidata: 'Wikidata', 'newsapi-headlines-only': 'NewsAPI' };
+
+  return (
+    <div className="border-t border-border pt-4 mt-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
+          <RefreshCw className="w-4 h-4 text-gold" /> Sincronizar Resultados Oficiais
+        </h3>
+        <button
+          onClick={handleSync}
+          disabled={loading}
+          className="btn btn-gold text-xs py-1.5 px-3 flex items-center gap-1.5"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          {loading ? 'Buscando...' : 'Sincronizar agora'}
+        </button>
+      </div>
+      <p className="text-[11px] text-gray-600">
+        Busca vencedores automaticamente em Wikipedia → Wikidata → NewsAPI.
+        O cron roda a cada 15 min nas madrugadas de domingo/segunda em março (UTC).
+      </p>
+
+      {log && (
+        <div className="bg-bg-base rounded-xl border border-border p-3 space-y-2 text-xs">
+          <div className="flex gap-3 text-gray-400">
+            <span>Fonte: <span className="text-gold font-medium">{SOURCE_LABEL[log.source] || log.source || '—'}</span></span>
+            {log.completedAt && <span className="text-gray-600">{new Date(log.completedAt).toLocaleTimeString('pt-BR')}</span>}
+          </div>
+
+          {log.matched?.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-green-500 font-medium flex items-center gap-1">
+                <CheckCircle className="w-3.5 h-3.5" /> {log.matched.length} categoria(s) importada(s)
+              </p>
+              <div className="max-h-28 overflow-y-auto space-y-0.5">
+                {log.matched.map((m, i) => (
+                  <div key={i} className="flex gap-2 text-gray-500">
+                    <span className="text-gray-600 shrink-0">{m.categoryId}</span>
+                    <span className="text-gray-400 truncate">{m.winner}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {log.unmatched?.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-orange-400 font-medium flex items-center gap-1">
+                <XCircle className="w-3.5 h-3.5" /> {log.unmatched.length} sem correspondência (insira manualmente)
+              </p>
+              <div className="max-h-20 overflow-y-auto space-y-0.5">
+                {log.unmatched.map((m, i) => (
+                  <div key={i} className="flex gap-2 text-gray-500">
+                    <span className="text-gray-600 shrink-0">{m.categoryId}</span>
+                    <span className="truncate">{m.winner}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {log.newsHeadlines?.length > 0 && (
+            <details className="text-gray-600">
+              <summary className="cursor-pointer flex items-center gap-1 text-gray-500 hover:text-gray-300">
+                <Newspaper className="w-3 h-3" /> {log.newsHeadlines.length} manchete(s) do NewsAPI
+              </summary>
+              <div className="mt-1 space-y-0.5 pl-4">
+                {log.newsHeadlines.map((h, i) => (
+                  <a key={i} href={h.url} target="_blank" rel="noreferrer"
+                    className="block truncate text-blue-500/70 hover:text-blue-400">
+                    {h.title}
+                  </a>
+                ))}
+              </div>
+            </details>
+          )}
+
+          {Object.keys(log.errors || {}).length > 0 && (
+            <div className="text-red-400/80 space-y-0.5">
+              {Object.entries(log.errors).map(([k, v]) => (
+                <p key={k}><span className="font-medium">{k}:</span> {v}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Admin Panel ───────────────────────────────────────────────────────────────
 
 function AdminPanel({ edition }) {
@@ -421,9 +535,7 @@ function AdminPanel({ edition }) {
     } finally { setLoading(false); }
   }
 
-  useState(() => { refresh(); }, []);
-  // Trigger on mount
-  if (loading && users.length === 0) { refresh(); }
+  useEffect(() => { refresh(); }, []);
 
   async function handleAction(action, username, nick) {
     setActionLoading(`${action}-${username}`);
@@ -609,6 +721,8 @@ function AdminPanel({ edition }) {
           })}
         </div>
       )}
+
+      <SyncPanel />
     </div>
   );
 }

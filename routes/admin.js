@@ -2,9 +2,9 @@ const express = require('express');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { listAllUsers, getUser, getUserByNick, setUserActive, deleteUser, updateUserSettings } = require('../data/repositories/userRepository');
 const { summarizeUsers } = require('../data/services/bootstrapService');
-const { resolveEdition } = require('../data/services/editionService');
 const { clearLockout, listLocked } = require('../lib/bruteForce');
 const { hashPassword } = require('../data/auth');
+const { syncResults, getSyncLog } = require('../data/services/resultsImporter');
 
 const router = express.Router();
 
@@ -14,7 +14,8 @@ router.use(authenticate, requireAdmin);
 // ── List all users (with stats) ───────────────────────────────────────────────
 router.get('/users', async (req, res) => {
   try {
-    const edition = req.query.edition || '';
+    const rawEdition = req.query.edition;
+    const edition = Array.isArray(rawEdition) ? rawEdition[0] : (rawEdition || '');
     const allUsers = await listAllUsers();
     const summaries = await summarizeUsers(edition, { publicOnly: false });
 
@@ -124,6 +125,32 @@ router.post('/users/:username/unblock', (req, res) => {
   } catch (e) {
     res.status(500).json({ error: 'Erro interno.' });
   }
+});
+
+// ── Results sync (Wikipedia / Wikidata / NewsAPI) ─────────────────────────────
+let _syncInProgress = false;
+
+router.post('/results/sync', async (req, res) => {
+  if (_syncInProgress) {
+    return res.status(409).json({ error: 'Sincronização já em andamento.' });
+  }
+  const rawEdition = req.query.edition;
+  const edition = Array.isArray(rawEdition) ? rawEdition[0] : (rawEdition || '');
+
+  _syncInProgress = true;
+  try {
+    const log = await syncResults(edition);
+    res.json({ ok: true, log });
+  } catch (e) {
+    console.error('Results sync error:', e);
+    res.status(500).json({ error: e.message || 'Erro interno.' });
+  } finally {
+    _syncInProgress = false;
+  }
+});
+
+router.get('/results/sync/status', (_req, res) => {
+  res.json({ inProgress: _syncInProgress, log: getSyncLog() });
 });
 
 module.exports = router;

@@ -30,6 +30,7 @@ const { loadFilms, loadCategories, loadEditions, loadAwards } = require('./data/
 const { buildBootstrapAsync } = require('./data/services/bootstrapService');
 const { migrateSchema, ensureDefaultAdmin } = require('./data/auth');
 const { fetchPosterUrl, downloadFile, updateFilmPosterUrl, prefetchAllPosters } = require('./lib/poster');
+const { syncResults } = require('./data/services/resultsImporter');
 
 const usersRouter = require('./routes/users');
 const predictionsRouter = require('./routes/predictions');
@@ -146,12 +147,41 @@ if (require.main === module) {
           console.log(`  💡  Para capas de maior qualidade: TMDB_API_KEY=sua_chave npm start\n`);
         }
         prefetchAllPosters(COVERS_DIR).catch(() => {});
+        scheduleResultsSync();
       });
     })
     .catch(err => {
       console.error('Falha na inicialização do servidor:', err);
       process.exit(1);
     });
+}
+
+// ── Results auto-sync cron ────────────────────────────────────────────────────
+// Runs every 15 min on Sundays & Mondays in March (Oscar ceremony window)
+// Ceremony typically: 1st/2nd Sunday of March, ~8pm ET = ~01:00 UTC Monday
+// Schedule: */15 22,23,0,1,2,3,4,5 * 3 0,1  (UTC)
+// Can be overridden with RESULTS_SYNC_CRON env var
+function scheduleResultsSync() {
+  let cron;
+  try { cron = require('node-cron'); } catch { return; }
+
+  const schedule = process.env.RESULTS_SYNC_CRON || '*/15 22,23,0,1,2,3,4,5 * 3 0,1';
+  if (!cron.validate(schedule)) {
+    console.warn('[cron] RESULTS_SYNC_CRON inválido, ignorando.');
+    return;
+  }
+
+  cron.schedule(schedule, async () => {
+    console.log('[cron] Sincronizando resultados oficiais...');
+    try {
+      const log = await syncResults('');
+      console.log(`[cron] Sync OK — fonte: ${log.source}, matched: ${log.matched.length}, unmatched: ${log.unmatched.length}`);
+    } catch (e) {
+      console.error('[cron] Sync error:', e.message);
+    }
+  }, { timezone: 'UTC' });
+
+  console.log(`  ⏰  Auto-sync resultados Oscar: ${schedule} (UTC)`);
 }
 
 module.exports = app;

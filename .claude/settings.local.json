@@ -9,7 +9,8 @@
       "Bash(find '/c/personal/oscar watchlist/Oscar-Watchlist' -name *.js -path */lib/* -o -name *.js -path */client/src/pages/*)",
       "Bash(npm run:*)",
       "Bash(npx vitest:*)",
-      "Bash(grep -E \"\\\\.\\(jsx|js|tsx|ts\\)$\")"
+      "Bash(grep -E \"\\\\.\\(jsx|js|tsx|ts\\)$\")",
+      "Bash(node -e \"require\\(''dotenv''\\).config\\(\\); console.log\\(''EMAIL_FROM:'', process.env.EMAIL_FROM\\);\")"
     ]
   }
 }

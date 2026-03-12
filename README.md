@@ -232,8 +232,8 @@ TURSO_URL=file:data/local.db
 TURSO_AUTH_TOKEN=            # Somente para Turso na nuvem
 
 # Pôsteres em alta qualidade (sem chave = Wikipedia, com chave = qualidade superior)
-TMDB_API_KEY=sua_chave_tmdb
-OMDB_API_KEY=sua_chave_omdb  # Alternativa ao TMDB
+TMDB_API_KEY=3fda102d660d05b1fff1224bfa108edd
+OMDB_API_KEY=3fda102d660d05b1fff1224bfa108edd  # Alternativa ao TMDB
 
 # Segurança JWT (mude em produção!)
 JWT_SECRET=seu-segredo-aqui

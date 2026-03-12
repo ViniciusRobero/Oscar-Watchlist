@@ -182,8 +182,8 @@ export const api = {
 
   // Admin endpoints
   admin: {
-    listUsers: (edition = '') =>
-      request(`/api/admin/users${edition ? `?edition=${encodeURIComponent(edition)}` : ''}`),
+    listUsers: () =>
+      request('/api/admin/users'),
 
     setActive: (username, isActive) =>
       request(`/api/admin/users/${encodeURIComponent(username)}/status`, {
@@ -206,5 +206,11 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify({ newPassword }),
       }),
+
+    syncResults: () =>
+      request('/api/admin/results/sync', { method: 'POST' }),
+
+    getSyncStatus: () =>
+      request('/api/admin/results/sync/status'),
   },
 };
