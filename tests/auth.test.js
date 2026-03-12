@@ -6,7 +6,7 @@ process.env.TURSO_URL = `file:${path.join(__dirname, '..', 'data', 'test_auth.db
 const app = require('../server');
 const { dbClient } = require('../config/db');
 const { migrateSchema, hashPassword, verifyPassword } = require('../data/auth');
-const { createUser, getUser, setUserActive, updateUserSettings } = require('../data/repositories/userRepository');
+const { createUser, getUser, getUserByNick, setUserActive, updateUserSettings } = require('../data/repositories/userRepository');
 const { summarizeUsers } = require('../data/services/bootstrapService');
 
 const TEST_EDITION = '__test_auth__';
@@ -22,6 +22,7 @@ beforeAll(async () => {
     await migrateSchema();
 
     await dbClient.executeMultiple(`
+    DELETE FROM user_logs;
     DELETE FROM user_predictions;
     DELETE FROM user_film_states;
     DELETE FROM refresh_tokens;
@@ -39,10 +40,17 @@ describe('Auth API Endpoints', () => {
     let accessToken = '';
     let refreshCookie = '';
 
-    test('POST /api/auth/register - Cria novo usuário (privado por padrão)', async () => {
+    test('POST /api/auth/register - Cria novo usuário com perfil completo', async () => {
         const res = await request(app)
             .post('/api/auth/register')
-            .send({ username: 'testuser', password: 'password123', edition: TEST_EDITION });
+            .send({
+                nick: 'testuser',
+                password: 'password123',
+                firstName: 'Test',
+                lastName: 'User',
+                email: 'test@example.com',
+                edition: TEST_EDITION,
+            });
 
         expect(res.statusCode).toBe(201);
         expect(res.body.accessToken).toBeDefined();
@@ -55,25 +63,59 @@ describe('Auth API Endpoints', () => {
         refreshCookie = setCookie.find(c => c.startsWith('oscar_refresh=')) || '';
         expect(refreshCookie).toBeTruthy();
 
-        // Verify user is created as private
-        const user = await getUser('testuser');
+        // Verify user is created as private with nick
+        const user = await getUserByNick('testuser');
+        expect(user).not.toBeNull();
         expect(user.isPrivate).toBe(true);
         expect(user.isActive).toBe(true);
+        expect(user.nick).toBe('testuser');
+        expect(user.email).toBe('test@example.com');
     });
 
-    test('POST /api/auth/register - Rejeita usuário duplicado', async () => {
+    test('POST /api/auth/register - Rejeita nick duplicado', async () => {
         const res = await request(app)
             .post('/api/auth/register')
-            .send({ username: 'testuser', password: 'password123', edition: TEST_EDITION });
+            .send({
+                nick: 'testuser',
+                password: 'password123',
+                firstName: 'Another',
+                lastName: 'User',
+                email: 'other@example.com',
+                edition: TEST_EDITION,
+            });
 
         expect(res.statusCode).toBe(409);
-        expect(res.body.error).toMatch(/já existe/i);
+        expect(res.body.error).toMatch(/nick já está em uso/i);
     });
 
-    test('POST /api/auth/login - Loga usuário existente', async () => {
+    test('POST /api/auth/register - Rejeita email duplicado', async () => {
+        const res = await request(app)
+            .post('/api/auth/register')
+            .send({
+                nick: 'differentnick',
+                password: 'password123',
+                firstName: 'Another',
+                lastName: 'User',
+                email: 'test@example.com', // same email
+                edition: TEST_EDITION,
+            });
+
+        expect(res.statusCode).toBe(409);
+        expect(res.body.error).toMatch(/email já está cadastrado/i);
+    });
+
+    test('POST /api/auth/register - Rejeita campos obrigatórios faltando', async () => {
+        const res = await request(app)
+            .post('/api/auth/register')
+            .send({ nick: 'x', password: 'pass', edition: TEST_EDITION });
+
+        expect(res.statusCode).toBe(400);
+    });
+
+    test('POST /api/auth/login - Loga usuário pelo nick', async () => {
         const res = await request(app)
             .post('/api/auth/login')
-            .send({ username: 'testuser', password: 'password123', edition: TEST_EDITION });
+            .send({ nick: 'testuser', password: 'password123', edition: TEST_EDITION });
 
         expect(res.statusCode).toBe(200);
         expect(res.body.accessToken).toBeDefined();
@@ -89,36 +131,38 @@ describe('Auth API Endpoints', () => {
     test('POST /api/auth/login - Rejeita senha errada', async () => {
         const res = await request(app)
             .post('/api/auth/login')
-            .send({ username: 'testuser', password: 'wrongpassword', edition: TEST_EDITION });
+            .send({ nick: 'testuser', password: 'wrongpassword', edition: TEST_EDITION });
 
         expect(res.statusCode).toBe(401);
         expect(res.body.error).toMatch(/incorreta/i);
     });
 
     test('POST /api/auth/login - Rejeita conta inativa', async () => {
-        await createUser('inactiveuser', hashPassword('pass123'), 'user');
+        await createUser('inactiveuser', hashPassword('pass123'), 'user', {
+            nick: 'inactiveuser', email: 'inactive@example.com', firstName: 'Inactive', lastName: 'User',
+        });
         await setUserActive('inactiveuser', false);
 
         const res = await request(app)
             .post('/api/auth/login')
-            .send({ username: 'inactiveuser', password: 'pass123', edition: TEST_EDITION });
+            .send({ nick: 'inactiveuser', password: 'pass123', edition: TEST_EDITION });
 
         expect(res.statusCode).toBe(403);
         expect(res.body.error).toMatch(/desativada/i);
     });
 
     test('POST /api/auth/login - Bloqueia após 5 tentativas falhas', async () => {
-        const bruteUser = 'brutetest';
+        const bruteNick = 'brutetest';
         await request(app).post('/api/auth/register')
-            .send({ username: bruteUser, password: 'correctpass', edition: TEST_EDITION });
+            .send({ nick: bruteNick, password: 'correctpass', firstName: 'Brute', lastName: 'Test', email: 'brute@example.com', edition: TEST_EDITION });
 
         for (let i = 0; i < 5; i++) {
             await request(app).post('/api/auth/login')
-                .send({ username: bruteUser, password: 'wrongpass', edition: TEST_EDITION });
+                .send({ nick: bruteNick, password: 'wrongpass', edition: TEST_EDITION });
         }
 
         const res = await request(app).post('/api/auth/login')
-            .send({ username: bruteUser, password: 'correctpass', edition: TEST_EDITION });
+            .send({ nick: bruteNick, password: 'correctpass', edition: TEST_EDITION });
 
         expect(res.statusCode).toBe(429);
         expect(res.body.error).toMatch(/bloqueada/i);
@@ -141,12 +185,12 @@ describe('Auth API Endpoints', () => {
     test('POST /api/auth/refresh - Fallback via body', async () => {
         const loginRes = await request(app)
             .post('/api/auth/login')
-            .send({ username: 'testuser', password: 'password123', edition: TEST_EDITION });
+            .send({ nick: 'testuser', password: 'password123', edition: TEST_EDITION });
 
         const setCookie = loginRes.headers['set-cookie'] || [];
         const freshCookie = setCookie.find(c => c.startsWith('oscar_refresh=')) || '';
         const tokenValue = freshCookie.split(';')[0].replace('oscar_refresh=', '');
-        refreshCookie = freshCookie; // save for subsequent tests
+        refreshCookie = freshCookie;
 
         const res = await request(app)
             .post('/api/auth/refresh')
@@ -199,7 +243,9 @@ describe('Auth: Senhas bcrypt', () => {
 
 describe('User settings', () => {
     test('setUserActive desativa e reativa conta', async () => {
-        await createUser('toggleuser', hashPassword('pass'), 'user');
+        await createUser('toggleuser', hashPassword('pass'), 'user', {
+            nick: 'toggleuser', email: 'toggle@example.com', firstName: 'Toggle', lastName: 'User',
+        });
 
         await setUserActive('toggleuser', false);
         const inactive = await getUser('toggleuser');
@@ -211,7 +257,9 @@ describe('User settings', () => {
     });
 
     test('updateUserSettings altera privacidade', async () => {
-        await createUser('privuser', hashPassword('pass'), 'user');
+        await createUser('privuser', hashPassword('pass'), 'user', {
+            nick: 'privuser', email: 'priv@example.com', firstName: 'Priv', lastName: 'User',
+        });
 
         await updateUserSettings('privuser', { isPrivate: false });
         const pub = await getUser('privuser');
@@ -222,8 +270,20 @@ describe('User settings', () => {
         expect(priv.isPrivate).toBe(true);
     });
 
+    test('getUserByNick encontra usuário pelo nick', async () => {
+        await createUser('nicktest', hashPassword('pass'), 'user', {
+            nick: 'nicktestuser', email: 'nicktest@example.com', firstName: 'Nick', lastName: 'Test',
+        });
+        const user = await getUserByNick('nicktestuser');
+        expect(user).not.toBeNull();
+        expect(user.username).toBe('nicktest');
+        expect(user.nick).toBe('nicktestuser');
+    });
+
     test('summarizeUsers com publicOnly exclui privados', async () => {
-        await createUser('pubuser', hashPassword('pass'), 'user');
+        await createUser('pubuser', hashPassword('pass'), 'user', {
+            nick: 'pubuser', email: 'pub@example.com', firstName: 'Pub', lastName: 'User',
+        });
         await updateUserSettings('pubuser', { isPrivate: false });
 
         const summaries = await summarizeUsers(TEST_EDITION, { publicOnly: true });

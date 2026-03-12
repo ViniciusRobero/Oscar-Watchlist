@@ -1,13 +1,16 @@
 import { createContext, useContext, useReducer, useCallback } from 'react';
 import { api, setCurrentEdition, isAuthenticated as checkAuth, getAccessToken } from '../api.js';
 
-function decodeJwtUsername(token) {
+function decodeJwt(token) {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.username || payload.sub || '';
+    return JSON.parse(atob(token.split('.')[1]));
   } catch {
-    return '';
+    return {};
   }
+}
+
+function decodeJwtUsername(token) {
+  return decodeJwt(token).username || decodeJwt(token).sub || '';
 }
 
 const AppContext = createContext(null);
@@ -19,6 +22,7 @@ const initialState = {
   userSummaries: [],
   profile: { films: {}, predictions: {} },
   activeUser: '',
+  nick: '',
   officialResults: {},
   edition: '',
   editions: [],
@@ -97,10 +101,12 @@ export function AppProvider({ children }) {
 
         const data = await api.bootstrap(username);
         if (data.edition) setCurrentEdition(data.edition);
+        const jwtPayload = decodeJwt(getAccessToken() || '');
         hydrate({
           ...data,
           isAuthenticated: checkAuth(),
           userRole: data.userRole || 'user',
+          nick: data.nick || jwtPayload.nick || username || '',
         });
 
         if (username) localStorage.setItem('oscar_active_user', username);

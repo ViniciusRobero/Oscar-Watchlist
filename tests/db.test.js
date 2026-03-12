@@ -5,7 +5,7 @@ process.env.TURSO_URL = `file:${path.join(__dirname, '..', 'data', 'test_db.db')
 
 const { dbClient } = require('../config/db');
 const { migrateSchema } = require('../data/auth');
-const { createUser, getUser, ensureUserAsync } = require('../data/repositories/userRepository');
+const { createUser, getUser, getUserByNick, getUserByEmail, ensureUserAsync } = require('../data/repositories/userRepository');
 const { getFilmState, updateFilmState } = require('../data/repositories/filmRepository');
 const { updatePrediction, getPredictionsMap } = require('../data/repositories/predictionRepository');
 const { getOfficialResults, updateOfficialResult } = require('../data/repositories/resultRepository');
@@ -33,6 +33,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
     await dbClient.executeMultiple(`
+      DELETE FROM user_logs;
       DELETE FROM user_predictions;
       DELETE FROM user_film_states;
       DELETE FROM refresh_tokens;
@@ -42,13 +43,34 @@ beforeEach(async () => {
 });
 
 describe('Database Core Async Functions', () => {
-    test('User creation and retrieval', async () => {
-        const user = await createUser('alice', 'hash123', 'admin');
+    test('User creation and retrieval (with nick/email)', async () => {
+        const user = await createUser('alice', 'hash123', 'admin', {
+            nick: 'alice', email: 'alice@example.com', firstName: 'Alice', lastName: 'Test',
+        });
         expect(user.username).toBe('alice');
         expect(user.role).toBe('admin');
+        expect(user.nick).toBe('alice');
+        expect(user.email).toBe('alice@example.com');
 
         const fetched = await getUser('alice');
         expect(fetched.passwordHash).toBe('hash123');
+    });
+
+    test('getUserByNick and getUserByEmail', async () => {
+        await createUser('bobuser', 'hash', 'user', {
+            nick: 'bobnick', email: 'bob@example.com', firstName: 'Bob', lastName: 'Test',
+        });
+
+        const byNick = await getUserByNick('bobnick');
+        expect(byNick).not.toBeNull();
+        expect(byNick.username).toBe('bobuser');
+
+        const byEmail = await getUserByEmail('bob@example.com');
+        expect(byEmail).not.toBeNull();
+        expect(byEmail.username).toBe('bobuser');
+
+        const notFound = await getUserByNick('nonexistent');
+        expect(notFound).toBeNull();
     });
 
     test('ensureUserAsync fallback logic', async () => {
@@ -56,14 +78,14 @@ describe('Database Core Async Functions', () => {
         expect(u1.username).toBe('bob');
         expect(u1.passwordHash).toBe('hash_bob');
 
-        // Should update password if requested but not exist
-        await dbClient.execute("UPDATE users SET password_hash = NULL WHERE id = 'bob'");
+        // Should update password if requested but hash is null
+        await dbClient.execute({ sql: "UPDATE users SET password_hash = NULL WHERE username = ?", args: ['bob'] });
         const u2 = await ensureUserAsync('bob', 'new_hash');
         expect(u2.passwordHash).toBe('new_hash');
     });
 
     test('Film states CRUD', async () => {
-        await createUser('charlie', 'hash', 'user');
+        await createUser('charlie', 'hash', 'user', { nick: 'charlie', email: 'charlie@example.com', firstName: 'Charlie', lastName: 'Test' });
 
         // Default
         let state = await getFilmState('charlie', 'film1', TEST_EDITION);
@@ -83,7 +105,7 @@ describe('Database Core Async Functions', () => {
     });
 
     test('Predictions CRUD', async () => {
-        await createUser('dave', 'hash', 'user');
+        await createUser('dave', 'hash', 'user', { nick: 'dave', email: 'dave@example.com', firstName: 'Dave', lastName: 'Test' });
 
         await updatePrediction('dave', 'cat1', TEST_EDITION, 'nom1');
         await updatePrediction('dave', 'cat2', TEST_EDITION, 'nom2');
@@ -109,8 +131,8 @@ describe('Database Core Async Functions', () => {
     });
 
     test('summarizeUsers calculates metrics', async () => {
-        await createUser('userA', 'hash', 'user');
-        await createUser('userB', 'hash', 'user');
+        await createUser('userA', 'hash', 'user', { nick: 'usera', email: 'usera@example.com', firstName: 'User', lastName: 'A' });
+        await createUser('userB', 'hash', 'user', { nick: 'userb', email: 'userb@example.com', firstName: 'User', lastName: 'B' });
 
         await updateFilmState('userA', 'film1', TEST_EDITION, { watched: true, personalRating: 10 });
         await updateFilmState('userA', 'film2', TEST_EDITION, { watched: true, personalRating: 8 });

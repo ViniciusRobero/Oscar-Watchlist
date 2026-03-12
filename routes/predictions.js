@@ -1,5 +1,7 @@
 const express = require('express');
 const { updatePrediction, getPredictionsMap } = require('../data/repositories/predictionRepository');
+const { getUser } = require('../data/repositories/userRepository');
+const { logAction } = require('../data/repositories/logRepository');
 const { authenticate, requireSameUserOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -22,6 +24,13 @@ router.patch('/:username/:categoryId', authenticate, requireSameUserOrAdmin, asy
     if (!username) return res.status(400).json({ error: 'Usuário inválido.' });
 
     await updatePrediction(username, categoryId, edition, nomineeId);
+
+    // Log prediction activity (fire-and-forget)
+    getUser(username).then(user => {
+      if (user) {
+        logAction(user.id, 'prediction', categoryId, 'category', { nomineeId, edition }).catch(() => {});
+      }
+    }).catch(() => {});
 
     // Return the updated predictions map
     const predictions = await getPredictionsMap(username, edition);

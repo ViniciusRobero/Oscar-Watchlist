@@ -1,9 +1,10 @@
 const express = require('express');
 const { authenticate, requireAdmin } = require('../middleware/auth');
-const { listAllUsers, setUserActive, deleteUser } = require('../data/repositories/userRepository');
+const { listAllUsers, getUser, getUserByNick, setUserActive, deleteUser, updateUserSettings } = require('../data/repositories/userRepository');
 const { summarizeUsers } = require('../data/services/bootstrapService');
 const { resolveEdition } = require('../data/services/editionService');
 const { clearLockout, listLocked } = require('../lib/bruteForce');
+const { hashPassword } = require('../data/auth');
 
 const router = express.Router();
 
@@ -14,12 +15,9 @@ router.use(authenticate, requireAdmin);
 router.get('/users', async (req, res) => {
   try {
     const edition = req.query.edition || '';
-    // Get base user list with active/private info
     const allUsers = await listAllUsers();
-    // Get stats (no filter — admin sees everyone)
     const summaries = await summarizeUsers(edition, { publicOnly: false });
 
-    // Merge stats into user list
     const result = allUsers.map(u => {
       const stats = summaries.find(s => s.username === u.username) || {};
       return {
@@ -30,7 +28,6 @@ router.get('/users', async (req, res) => {
       };
     });
 
-    // Also include which users are currently brute-force locked
     const locked = listLocked();
     const lockedSet = new Set(locked.map(l => l.username));
 
@@ -80,11 +77,40 @@ router.delete('/users/:username', async (req, res) => {
       return res.status(400).json({ error: 'A conta admin não pode ser excluída.' });
     }
 
-    await deleteUser(target);
-    clearLockout(target); // clear any brute-force state
+    // Fetch user to get their id (needed for deleteUser)
+    const user = await getUser(target);
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+
+    await deleteUser(user.id);
+    clearLockout(target);
     res.json({ ok: true, username: target });
   } catch (e) {
     console.error('Admin delete user error:', e);
+    res.status(500).json({ error: 'Erro interno.' });
+  }
+});
+
+// ── Force-change user password (by nick) ──────────────────────────────────────
+router.patch('/users/:nick/password', async (req, res) => {
+  try {
+    const nick = String(req.params.nick || '').trim().toLowerCase();
+    const { newPassword } = req.body;
+
+    if (!newPassword || String(newPassword).length < 6 || String(newPassword).length > 100) {
+      return res.status(400).json({ error: 'Nova senha inválida (mín. 6 caracteres).' });
+    }
+
+    const user = await getUserByNick(nick);
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+
+    if (nick === 'admin' && req.user.nick !== 'admin') {
+      return res.status(400).json({ error: 'A senha do admin só pode ser alterada pelo próprio admin.' });
+    }
+
+    await updateUserSettings(user.username, { newPasswordHash: hashPassword(String(newPassword)) });
+    res.json({ ok: true, nick });
+  } catch (e) {
+    console.error('Admin change password error:', e);
     res.status(500).json({ error: 'Erro interno.' });
   }
 });

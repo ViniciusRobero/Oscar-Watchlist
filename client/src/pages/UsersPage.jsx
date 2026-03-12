@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
-  PlusCircle, LogIn, Users, Star, Trophy, Eye, Lock, EyeOff,
-  AlertCircle, Shield, UserX, UserCheck, Unlock, Trash2, Globe, EyeOff as PrivateIcon,
+  PlusCircle, LogIn, Star, Trophy, Eye, Lock, EyeOff,
+  AlertCircle, Shield, UserX, UserCheck, Unlock, Trash2, Globe, Key,
+  User, Mail, Calendar, AtSign,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import { useAuth } from '../hooks/useAuth.js';
@@ -9,12 +10,13 @@ import { api } from '../api.js';
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
-function PasswordInput({ value, onChange, placeholder, autoComplete, autoFocus }) {
+function PasswordInput({ value, onChange, placeholder, autoComplete, autoFocus, name }) {
   const [show, setShow] = useState(false);
   return (
     <div className="relative">
       <input
         type={show ? 'text' : 'password'}
+        name={name}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
@@ -30,24 +32,50 @@ function PasswordInput({ value, onChange, placeholder, autoComplete, autoFocus }
   );
 }
 
-// ── Own-user settings panel ───────────────────────────────────────────────────
+// ── Settings Panel ────────────────────────────────────────────────────────────
 
-function SettingsPanel({ summary, onClose }) {
+function SettingsPanel({ onClose }) {
   const { showToast, state, bootstrap } = useApp();
   const [tab, setTab] = useState('privacy');
-  const [isPrivate, setIsPrivate] = useState(summary.isPrivate ?? true);
+  const [isPrivate, setIsPrivate] = useState(state.userSummaries.find(s => s.username === state.activeUser)?.isPrivate ?? true);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const TABS = ['privacy', 'profile', 'password'];
+  const TAB_LABELS = { privacy: 'Privacidade', profile: 'Perfil', password: 'Alterar senha' };
+
   async function savePrivacy() {
     setLoading(true); setError('');
     try {
       await api.updateSettings(state.activeUser, { isPrivate });
       await bootstrap(state.activeUser);
-      showToast(isPrivate ? 'Perfil agora é privado.' : 'Perfil agora é público.');
+      showToast(isPrivate ? 'Perfil agora é privado.' : 'Perfil público — aparece na comparação de palpites.');
+      onClose();
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }
+
+  async function saveProfile(e) {
+    e.preventDefault();
+    setError('');
+    const patch = {};
+    if (firstName.trim()) patch.firstName = firstName.trim();
+    if (lastName.trim()) patch.lastName = lastName.trim();
+    if (email.trim()) patch.email = email.trim().toLowerCase();
+    if (birthDate) patch.birthDate = birthDate;
+    if (Object.keys(patch).length === 0) return setError('Preencha ao menos um campo.');
+    setLoading(true);
+    try {
+      await api.updateSettings(state.activeUser, patch);
+      showToast('Perfil atualizado!');
+      setFirstName(''); setLastName(''); setEmail(''); setBirthDate('');
       onClose();
     } catch (e) { setError(e.message); }
     finally { setLoading(false); }
@@ -70,26 +98,21 @@ function SettingsPanel({ summary, onClose }) {
 
   return (
     <div className="mt-3 border-t border-border pt-3 space-y-3">
-      {/* Tab switcher */}
       <div className="flex gap-1 bg-bg-raised rounded-lg p-1">
-        <button
-          onClick={() => { setTab('privacy'); setError(''); }}
-          className={`flex-1 text-xs py-1.5 rounded-md transition-colors font-medium ${tab === 'privacy' ? 'bg-bg-hover text-gray-100' : 'text-gray-500 hover:text-gray-300'}`}
-        >
-          Privacidade
-        </button>
-        <button
-          onClick={() => { setTab('password'); setError(''); }}
-          className={`flex-1 text-xs py-1.5 rounded-md transition-colors font-medium ${tab === 'password' ? 'bg-bg-hover text-gray-100' : 'text-gray-500 hover:text-gray-300'}`}
-        >
-          Alterar senha
-        </button>
+        {TABS.map(t => (
+          <button key={t}
+            onClick={() => { setTab(t); setError(''); }}
+            className={`flex-1 text-xs py-1.5 rounded-md transition-colors font-medium ${tab === t ? 'bg-bg-hover text-gray-100' : 'text-gray-500 hover:text-gray-300'}`}
+          >
+            {TAB_LABELS[t]}
+          </button>
+        ))}
       </div>
 
       {tab === 'privacy' && (
         <div className="space-y-3">
           <p className="text-xs text-gray-500">
-            Contas privadas não aparecem na lista pública de perfis.
+            Contas públicas permitem comparação de palpites com outros usuários.
           </p>
           <button
             onClick={() => setIsPrivate(v => !v)}
@@ -101,7 +124,7 @@ function SettingsPanel({ summary, onClose }) {
           >
             {isPrivate
               ? <><Lock className="w-4 h-4 text-gray-500" /> Perfil privado (padrão)</>
-              : <><Globe className="w-4 h-4" /> Perfil público (visível a todos)</>
+              : <><Globe className="w-4 h-4" /> Público — disponível para comparação</>
             }
           </button>
           {error && <p className="text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{error}</p>}
@@ -114,14 +137,39 @@ function SettingsPanel({ summary, onClose }) {
         </div>
       )}
 
+      {tab === 'profile' && (
+        <form onSubmit={saveProfile} className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <input value={firstName} onChange={e => setFirstName(e.target.value)}
+              placeholder="Novo nome" className="input text-sm" maxLength={60} />
+            <input value={lastName} onChange={e => setLastName(e.target.value)}
+              placeholder="Novo sobrenome" className="input text-sm" maxLength={60} />
+          </div>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+            placeholder="Novo email" className="input w-full text-sm" />
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Data de nascimento</label>
+            <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)}
+              className="input w-full text-sm" />
+          </div>
+          {error && <p className="text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{error}</p>}
+          <div className="flex gap-2">
+            <button type="submit" disabled={loading} className="btn btn-gold text-xs py-1.5 px-3 flex-1">
+              {loading ? 'Salvando...' : 'Salvar perfil'}
+            </button>
+            <button type="button" onClick={onClose} className="btn text-xs py-1.5 px-3">Cancelar</button>
+          </div>
+        </form>
+      )}
+
       {tab === 'password' && (
         <form onSubmit={savePassword} className="space-y-2">
           <PasswordInput value={currentPw} onChange={e => setCurrentPw(e.target.value)}
-            placeholder="Senha atual" autoComplete="current-password" autoFocus />
+            placeholder="Senha atual" autoComplete="current-password" autoFocus name="currentPassword" />
           <PasswordInput value={newPw} onChange={e => setNewPw(e.target.value)}
-            placeholder="Nova senha (mín. 6 caracteres)" autoComplete="new-password" />
+            placeholder="Nova senha (mín. 6 caracteres)" autoComplete="new-password" name="newPassword" />
           <PasswordInput value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
-            placeholder="Confirmar nova senha" autoComplete="new-password" />
+            placeholder="Confirmar nova senha" autoComplete="new-password" name="confirmPassword" />
           {error && <p className="text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{error}</p>}
           <div className="flex gap-2">
             <button type="submit" disabled={loading || !currentPw || !newPw || !confirmPw}
@@ -136,106 +184,61 @@ function SettingsPanel({ summary, onClose }) {
   );
 }
 
-// ── User Card ─────────────────────────────────────────────────────────────────
+// ── Active user card ──────────────────────────────────────────────────────────
 
-function UserCard({ summary, isActive, onSelect, onLogout, totalFilms }) {
-  const [showLogin, setShowLogin] = useState(false);
+function ActiveUserCard({ onLogout }) {
+  const { state } = useApp();
   const [showSettings, setShowSettings] = useState(false);
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const progressPct = totalFilms > 0 ? Math.round((summary.watchedCount / totalFilms) * 100) : 0;
-
-  async function handleLogin(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!password.trim()) return;
-    setLoading(true); setError('');
-    try {
-      await onSelect(summary.username, password.trim());
-      setShowLogin(false); setPassword('');
-    } catch (err) {
-      setError(err.message || 'Senha incorreta.');
-    } finally { setLoading(false); }
-  }
-
-  const privacyBadge = isActive ? (
-    summary.isPrivate
-      ? <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 border border-border rounded-full px-2 py-0.5"><Lock className="w-2.5 h-2.5" />Privado</span>
-      : <span className="inline-flex items-center gap-1 text-[10px] text-gold/70 border border-gold/20 rounded-full px-2 py-0.5"><Globe className="w-2.5 h-2.5" />Público</span>
-  ) : null;
+  const summary = state.userSummaries.find(s => s.username === state.activeUser) || {};
+  const totalFilms = state.films.length;
+  const progressPct = totalFilms > 0 ? Math.round(((summary.watchedCount || 0) / totalFilms) * 100) : 0;
 
   return (
-    <article className={`card p-5 transition-all duration-150 ${isActive ? 'border-gold-dim ring-1 ring-gold-dim/30' : 'hover:border-border-active hover:shadow-xl hover:shadow-black/30'}`}>
-      <div className="flex items-start justify-between mb-2">
+    <div className="card p-5 border-gold-dim ring-1 ring-gold-dim/30">
+      <div className="flex items-start justify-between mb-3">
         <div>
           <div className="flex items-center gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-gold' : 'bg-gray-700'}`} />
-            <h3 className="font-bold text-gray-100">{summary.username}</h3>
+            <div className="w-2.5 h-2.5 rounded-full bg-gold" />
+            <h3 className="font-bold text-gray-100">{state.activeUser}</h3>
+            {state.nick && state.nick !== state.activeUser && (
+              <span className="text-xs text-gray-500">@{state.nick}</span>
+            )}
           </div>
           <div className="flex items-center gap-2 mt-1">
-            {isActive && <span className="badge badge-gold text-[10px] py-0.5 px-2">Perfil ativo</span>}
-            {privacyBadge}
+            <span className="badge badge-gold text-[10px] py-0.5 px-2">Perfil ativo</span>
+            {summary.isPrivate !== undefined && (
+              summary.isPrivate
+                ? <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 border border-border rounded-full px-2 py-0.5"><Lock className="w-2.5 h-2.5" />Privado</span>
+                : <span className="inline-flex items-center gap-1 text-[10px] text-gold/70 border border-gold/20 rounded-full px-2 py-0.5"><Globe className="w-2.5 h-2.5" />Público</span>
+            )}
           </div>
         </div>
         <div className="flex gap-1.5">
-          {isActive && (
-            <>
-              <button
-                onClick={() => { setShowSettings(v => !v); setShowLogin(false); setError(''); }}
-                className="btn btn-ghost text-xs py-1.5 px-3"
-                title="Configurações"
-              >
-                <Lock className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => { if (window.confirm('Sair do perfil?')) onLogout(); }}
-                className="btn text-xs py-1.5 px-3 text-red-400 border-red-900/40 hover:border-red-700/60"
-              >
-                Sair
-              </button>
-            </>
-          )}
-          {!isActive && !showLogin && (
-            <button onClick={() => setShowLogin(true)} className="btn text-xs py-1.5 px-3">
-              <LogIn className="w-3.5 h-3.5" /> Entrar
-            </button>
-          )}
+          <button
+            onClick={() => setShowSettings(v => !v)}
+            className="btn btn-ghost text-xs py-1.5 px-3"
+            title="Configurações"
+          >
+            <Lock className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => { if (window.confirm('Sair do perfil?')) onLogout(); }}
+            className="btn text-xs py-1.5 px-3 text-red-400 border-red-900/40 hover:border-red-700/60"
+          >
+            Sair
+          </button>
         </div>
       </div>
 
-      {showLogin && (
-        <form onSubmit={handleLogin} className="mb-3 flex flex-col gap-2">
-          <div className="relative">
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="Digite a senha" className="input w-full text-sm pr-8" autoFocus />
-            <Lock className="absolute right-2.5 top-2.5 w-3.5 h-3.5 text-gray-600" />
-          </div>
-          {error && <p className="text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5 shrink-0" />{error}</p>}
-          <div className="flex gap-2">
-            <button type="submit" disabled={!password.trim() || loading} className="btn btn-gold text-xs py-1.5 px-3 flex-1">
-              {loading ? 'Entrando...' : 'Confirmar'}
-            </button>
-            <button type="button" onClick={() => { setShowLogin(false); setPassword(''); setError(''); }} className="btn text-xs py-1.5 px-3">
-              Cancelar
-            </button>
-          </div>
-        </form>
-      )}
-
-      {showSettings && isActive && (
-        <SettingsPanel summary={summary} onClose={() => setShowSettings(false)} />
-      )}
-
-      <div className="grid grid-cols-3 gap-2 mb-3 mt-2">
+      <div className="grid grid-cols-3 gap-2 mb-3">
         <div className="bg-bg-raised rounded-lg p-2.5 text-center">
           <Eye className="w-4 h-4 text-gray-500 mx-auto mb-1" />
-          <p className="text-lg font-bold text-gray-100">{summary.watchedCount}</p>
+          <p className="text-lg font-bold text-gray-100">{summary.watchedCount ?? 0}</p>
           <p className="text-[10px] text-gray-600 uppercase tracking-wider">Assistidos</p>
         </div>
         <div className="bg-bg-raised rounded-lg p-2.5 text-center">
           <Trophy className="w-4 h-4 text-gray-500 mx-auto mb-1" />
-          <p className="text-lg font-bold text-gray-100">{summary.predictionsCount}</p>
+          <p className="text-lg font-bold text-gray-100">{summary.predictionsCount ?? 0}</p>
           <p className="text-[10px] text-gray-600 uppercase tracking-wider">Palpites</p>
         </div>
         <div className="bg-bg-raised rounded-lg p-2.5 text-center">
@@ -248,14 +251,151 @@ function UserCard({ summary, isActive, onSelect, onLogout, totalFilms }) {
       <div>
         <div className="flex justify-between text-xs text-gray-600 mb-1">
           <span>Progresso</span>
-          <span>{summary.watchedCount}/{totalFilms}</span>
+          <span>{summary.watchedCount ?? 0}/{totalFilms}</span>
         </div>
         <div className="bg-bg-base rounded-full h-1.5 overflow-hidden">
           <div className="h-full bg-gradient-to-r from-gold-dim to-gold transition-all duration-500"
             style={{ width: `${progressPct}%` }} />
         </div>
       </div>
-    </article>
+
+      {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+    </div>
+  );
+}
+
+// ── Login form ────────────────────────────────────────────────────────────────
+
+function LoginForm({ onLogin }) {
+  const [nick, setNick] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!nick.trim() || !password.trim()) return;
+    setLoading(true); setError('');
+    try {
+      await onLogin(nick.trim().toLowerCase(), password.trim());
+    } catch (err) {
+      setError(err.message || 'Erro ao fazer login.');
+    } finally { setLoading(false); }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="relative">
+        <AtSign className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-600" />
+        <input
+          value={nick}
+          onChange={e => setNick(e.target.value)}
+          placeholder="Nick"
+          autoComplete="username"
+          className="input w-full pl-8 text-sm"
+          autoFocus
+        />
+      </div>
+      <PasswordInput value={password} onChange={e => setPassword(e.target.value)}
+        placeholder="Senha" autoComplete="current-password" name="password" />
+      {error && <p className="text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5 shrink-0" />{error}</p>}
+      <button type="submit" disabled={!nick.trim() || !password.trim() || loading}
+        className="btn btn-gold w-full">
+        <LogIn className="w-4 h-4" />
+        {loading ? 'Entrando...' : 'Entrar'}
+      </button>
+    </form>
+  );
+}
+
+// ── Register form ─────────────────────────────────────────────────────────────
+
+function RegisterForm({ onRegister }) {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [nick, setNick] = useState('');
+  const [email, setEmail] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const nickNormalized = nick.toLowerCase().replace(/[^a-z0-9_.]/g, '');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+    if (!firstName.trim()) return setError('Nome é obrigatório.');
+    if (!lastName.trim()) return setError('Sobrenome é obrigatório.');
+    const n = nick.trim().toLowerCase();
+    if (!n || n.length < 3 || n.length > 20) return setError('Nick deve ter entre 3 e 20 caracteres.');
+    if (!/^[a-z0-9_.]+$/.test(n)) return setError('Nick: apenas letras minúsculas, números, ponto e underscore.');
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setError('Email inválido.');
+    if (password.length < 6) return setError('Senha deve ter ao menos 6 caracteres.');
+    if (password !== confirmPassword) return setError('Senhas não coincidem.');
+    setLoading(true);
+    try {
+      await onRegister({ nick: n, password, firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim().toLowerCase(), birthDate: birthDate || null });
+    } catch (err) {
+      setError(err.message);
+    } finally { setLoading(false); }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="relative">
+          <User className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-600" />
+          <input value={firstName} onChange={e => setFirstName(e.target.value)}
+            placeholder="Nome" autoComplete="given-name"
+            className="input w-full pl-8 text-sm" maxLength={60} />
+        </div>
+        <input value={lastName} onChange={e => setLastName(e.target.value)}
+          placeholder="Sobrenome" autoComplete="family-name"
+          className="input w-full text-sm" maxLength={60} />
+      </div>
+      <div className="relative">
+        <AtSign className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-600" />
+        <input
+          value={nickNormalized}
+          onChange={e => setNick(e.target.value)}
+          placeholder="nick (3-20 chars, letras minúsculas)"
+          autoComplete="username"
+          className="input w-full pl-8 text-sm"
+          maxLength={20}
+        />
+      </div>
+      <div className="relative">
+        <Mail className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-600" />
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="Email" autoComplete="email"
+          className="input w-full pl-8 text-sm" />
+      </div>
+      <div>
+        <label className="text-xs text-gray-500 mb-1 block flex items-center gap-1">
+          <Calendar className="w-3.5 h-3.5" /> Data de nascimento <span className="text-gray-600">(opcional)</span>
+        </label>
+        <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)}
+          className="input w-full text-sm" />
+      </div>
+      <PasswordInput value={password} onChange={e => setPassword(e.target.value)}
+        placeholder="Senha (mín. 6 caracteres)" autoComplete="new-password" name="newPassword" />
+      <PasswordInput value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+        placeholder="Confirmar senha" autoComplete="new-password" name="confirmPassword" />
+      {error && (
+        <p className="text-xs text-danger flex items-center gap-1">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {error}
+        </p>
+      )}
+      <button type="submit" disabled={loading} className="btn btn-gold w-full">
+        <PlusCircle className="w-4 h-4" />
+        {loading ? 'Criando...' : 'Criar conta'}
+      </button>
+      <p className="text-xs text-gray-600 text-center">
+        Novos perfis são privados por padrão. Você pode habilitá-los para comparação de palpites nas configurações.
+      </p>
+    </form>
   );
 }
 
@@ -267,6 +407,8 @@ function AdminPanel({ edition }) {
   const [locked, setLocked] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
+  const [changingPasswordFor, setChangingPasswordFor] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
 
   async function refresh() {
     setLoading(true);
@@ -279,9 +421,11 @@ function AdminPanel({ edition }) {
     } finally { setLoading(false); }
   }
 
-  useEffect(() => { refresh(); }, [edition]);
+  useState(() => { refresh(); }, []);
+  // Trigger on mount
+  if (loading && users.length === 0) { refresh(); }
 
-  async function handleAction(action, username) {
+  async function handleAction(action, username, nick) {
     setActionLoading(`${action}-${username}`);
     try {
       if (action === 'delete') {
@@ -306,6 +450,24 @@ function AdminPanel({ edition }) {
     }
   }
 
+  async function handleChangePassword(nick) {
+    if (!newPassword || newPassword.length < 6) {
+      showToast('Senha deve ter ao menos 6 caracteres.', 'error');
+      return;
+    }
+    setActionLoading(`password-${nick}`);
+    try {
+      await api.admin.changePassword(nick, newPassword);
+      showToast(`Senha de "@${nick}" alterada.`);
+      setChangingPasswordFor(null);
+      setNewPassword('');
+    } catch (e) {
+      showToast(e.message || 'Erro ao alterar senha.', 'error');
+    } finally {
+      setActionLoading('');
+    }
+  }
+
   if (loading) return <div className="text-center py-8 text-gray-600">Carregando...</div>;
 
   return (
@@ -314,6 +476,7 @@ function AdminPanel({ edition }) {
         <h2 className="font-bold text-gray-100 flex items-center gap-2">
           <Shield className="w-4 h-4 text-gold" /> Painel Admin
         </h2>
+        <button onClick={refresh} className="text-xs text-gray-500 hover:text-gray-300">↻ Atualizar</button>
         <span className="text-xs text-gray-500">{users.length} usuário(s)</span>
       </div>
 
@@ -323,80 +486,124 @@ function AdminPanel({ edition }) {
         <div className="space-y-2">
           {users.map(u => {
             const isLocked = u.isLocked;
-            const key = u.username;
             return (
-              <div key={key}
-                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
+              <div key={u.username}
+                className={`p-3 rounded-xl border transition-colors ${
                   !u.isActive ? 'border-red-900/30 bg-red-950/10' : 'border-border bg-bg-raised'
                 }`}
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-sm text-gray-100 truncate">{u.username}</span>
-                    {u.role === 'admin' && (
-                      <span className="text-[10px] badge badge-gold py-0.5 px-2">Admin</span>
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-sm text-gray-100">{u.username}</span>
+                      {u.nick && u.nick !== u.username && (
+                        <span className="text-xs text-gray-500">@{u.nick}</span>
+                      )}
+                      {u.role === 'admin' && (
+                        <span className="text-[10px] badge badge-gold py-0.5 px-2">Admin</span>
+                      )}
+                      {!u.isActive && (
+                        <span className="text-[10px] text-red-400 border border-red-900/50 rounded-full px-2 py-0.5">Inativo</span>
+                      )}
+                      {u.isPrivate ? (
+                        <span className="text-[10px] text-gray-500 border border-border rounded-full px-2 py-0.5">Privado</span>
+                      ) : (
+                        <span className="text-[10px] text-gold/60 border border-gold/20 rounded-full px-2 py-0.5">Público</span>
+                      )}
+                      {isLocked && (
+                        <span className="text-[10px] text-orange-400 border border-orange-900/50 rounded-full px-2 py-0.5">Bloqueado</span>
+                      )}
+                    </div>
+                    {(u.firstName || u.lastName || u.email) && (
+                      <p className="text-[11px] text-gray-500 mt-0.5">
+                        {[u.firstName, u.lastName].filter(Boolean).join(' ')}
+                        {u.email && <span className="ml-2 text-gray-600">{u.email}</span>}
+                      </p>
                     )}
-                    {!u.isActive && (
-                      <span className="text-[10px] text-red-400 border border-red-900/50 rounded-full px-2 py-0.5">Inativo</span>
-                    )}
-                    {u.isPrivate ? (
-                      <span className="text-[10px] text-gray-500 border border-border rounded-full px-2 py-0.5">Privado</span>
-                    ) : (
-                      <span className="text-[10px] text-gold/60 border border-gold/20 rounded-full px-2 py-0.5">Público</span>
-                    )}
+                    <p className="text-[11px] text-gray-600 mt-0.5">
+                      {u.watchedCount ?? 0} filmes · {u.predictionsCount ?? 0} palpites
+                      {u.averageRating ? ` · ★ ${u.averageRating}` : ''}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-1.5 flex-shrink-0">
                     {isLocked && (
-                      <span className="text-[10px] text-orange-400 border border-orange-900/50 rounded-full px-2 py-0.5">Bloqueado</span>
+                      <button
+                        onClick={() => handleAction('unblock', u.username, u.nick)}
+                        disabled={!!actionLoading}
+                        className="btn text-xs py-1 px-2 text-orange-400 border-orange-900/40 hover:border-orange-700/60"
+                        title="Desbloquear"
+                      >
+                        <Unlock className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setChangingPasswordFor(changingPasswordFor === u.nick ? null : u.nick); setNewPassword(''); }}
+                      disabled={!!actionLoading}
+                      className="btn text-xs py-1 px-2 text-blue-400 border-blue-900/40 hover:border-blue-700/60"
+                      title="Alterar senha"
+                    >
+                      <Key className="w-3.5 h-3.5" />
+                    </button>
+                    {u.role !== 'admin' && (
+                      <>
+                        {u.isActive ? (
+                          <button
+                            onClick={() => handleAction('deactivate', u.username, u.nick)}
+                            disabled={!!actionLoading}
+                            className="btn text-xs py-1 px-2 text-yellow-500 border-yellow-900/40 hover:border-yellow-700/60"
+                            title="Desativar conta"
+                          >
+                            <UserX className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleAction('activate', u.username, u.nick)}
+                            disabled={!!actionLoading}
+                            className="btn text-xs py-1 px-2 text-green-500 border-green-900/40 hover:border-green-700/60"
+                            title="Ativar conta"
+                          >
+                            <UserCheck className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleAction('delete', u.username, u.nick)}
+                          disabled={!!actionLoading}
+                          className="btn text-xs py-1 px-2 text-red-400 border-red-900/40 hover:border-red-700/60"
+                          title="Excluir usuário"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
                     )}
                   </div>
-                  <p className="text-[11px] text-gray-600 mt-0.5">
-                    {u.watchedCount ?? 0} filmes · {u.predictionsCount ?? 0} palpites
-                    {u.averageRating ? ` · ★ ${u.averageRating}` : ''}
-                  </p>
                 </div>
 
-                <div className="flex gap-1.5 flex-shrink-0">
-                  {isLocked && (
+                {changingPasswordFor === u.nick && (
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      placeholder="Nova senha (mín. 6 chars)"
+                      className="input flex-1 text-sm"
+                      autoFocus
+                    />
                     <button
-                      onClick={() => handleAction('unblock', u.username)}
-                      disabled={!!actionLoading}
-                      className="btn text-xs py-1 px-2 text-orange-400 border-orange-900/40 hover:border-orange-700/60"
-                      title="Desbloquear"
+                      onClick={() => handleChangePassword(u.nick)}
+                      disabled={!!actionLoading || newPassword.length < 6}
+                      className="btn btn-gold text-xs py-1.5 px-3"
                     >
-                      <Unlock className="w-3.5 h-3.5" />
+                      {actionLoading === `password-${u.nick}` ? '...' : 'Salvar'}
                     </button>
-                  )}
-                  {u.role !== 'admin' && (
-                    <>
-                      {u.isActive ? (
-                        <button
-                          onClick={() => handleAction('deactivate', u.username)}
-                          disabled={!!actionLoading}
-                          className="btn text-xs py-1 px-2 text-yellow-500 border-yellow-900/40 hover:border-yellow-700/60"
-                          title="Desativar conta"
-                        >
-                          <UserX className="w-3.5 h-3.5" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleAction('activate', u.username)}
-                          disabled={!!actionLoading}
-                          className="btn text-xs py-1 px-2 text-green-500 border-green-900/40 hover:border-green-700/60"
-                          title="Ativar conta"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleAction('delete', u.username)}
-                        disabled={!!actionLoading}
-                        className="btn text-xs py-1 px-2 text-red-400 border-red-900/40 hover:border-red-700/60"
-                        title="Excluir usuário"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </>
-                  )}
-                </div>
+                    <button
+                      onClick={() => { setChangingPasswordFor(null); setNewPassword(''); }}
+                      className="btn text-xs py-1.5 px-3"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -409,51 +616,21 @@ function AdminPanel({ edition }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export function UsersPage() {
-  const { state, showToast } = useApp();
+  const { state } = useApp();
   const { login, register, logout } = useAuth();
-  const [newName, setNewName] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPw, setShowPw] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState('');
+  const [showRegister, setShowRegister] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
 
   const isAdmin = state.userRole === 'admin';
-  const isFormValid = newName.trim().length >= 2 && newPassword.length >= 6 && newPassword === confirmPassword;
-  const totalFilms = state.films.length;
-
-  async function handleLogin(username, password) {
-    await login(username, password);
-    localStorage.setItem('oscar_active_user', username);
-  }
-
-  async function handleCreate(e) {
-    e.preventDefault();
-    setCreateError('');
-    if (!newName.trim()) return;
-    if (!newPassword.trim()) return setCreateError('Senha obrigatória.');
-    if (newPassword.length < 6) return setCreateError('Senha deve ter ao menos 6 caracteres.');
-    if (newPassword !== confirmPassword) return setCreateError('Senhas não coincidem.');
-    setCreating(true);
-    try {
-      await register(newName.trim(), newPassword.trim());
-      localStorage.setItem('oscar_active_user', newName.trim());
-      setNewName(''); setNewPassword(''); setConfirmPassword('');
-    } catch (err) {
-      setCreateError(err.message);
-    } finally {
-      setCreating(false);
-    }
-  }
+  const isLoggedIn = state.isAuthenticated && !!state.activeUser;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-xl mx-auto">
       <div className="mb-6 flex items-start justify-between gap-3">
         <div>
-          <h1 className="section-title font-display text-2xl">Perfis</h1>
+          <h1 className="section-title font-display text-2xl">Perfil</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Cada perfil tem sua própria watchlist, notas e palpites.
+            Gerencie sua conta e configurações.
           </p>
         </div>
         {isAdmin && (
@@ -474,81 +651,35 @@ export function UsersPage() {
         </div>
       )}
 
-      {/* Create new profile */}
-      <div className="card p-5 mb-6">
-        <p className="meta-label mb-3">Criar novo perfil</p>
-        <form onSubmit={handleCreate} className="space-y-3">
-          <input
-            name="username"
-            autoComplete="username"
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-            placeholder="Nome de usuário"
-            className="input w-full"
-            maxLength={40}
-          />
-          <div className="relative">
-            <input
-              name="password"
-              autoComplete="new-password"
-              type={showPw ? 'text' : 'password'}
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              placeholder="Senha (mín. 6 caracteres)"
-              className="input w-full pr-10"
-            />
-            <button type="button" onClick={() => setShowPw(v => !v)}
-              className="absolute right-2.5 top-2.5 text-gray-600 hover:text-gray-400">
-              {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-          <input
-            name="confirmPassword"
-            autoComplete="new-password"
-            type={showPw ? 'text' : 'password'}
-            value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
-            placeholder="Confirmar senha"
-            className="input w-full"
-          />
-          {createError && (
-            <p className="text-xs text-danger flex items-center gap-1">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {createError}
-            </p>
-          )}
-          <button type="submit" disabled={!isFormValid || creating} className="btn btn-gold px-4 w-full">
-            <PlusCircle className="w-4 h-4" />
-            {creating ? 'Criando...' : 'Criar perfil'}
-          </button>
-          <p className="text-xs text-gray-600 text-center">
-            Novos perfis são privados por padrão. Você pode torná-lo público nas configurações.
-          </p>
-        </form>
-      </div>
-
-      {/* Public profiles */}
-      {state.userSummaries.length === 0 ? (
-        <div className="card p-12 flex flex-col items-center gap-3 text-center">
-          <Users className="w-10 h-10 text-gray-700" />
-          <p className="text-gray-500 font-medium">Nenhum perfil público ainda</p>
-          <p className="text-sm text-gray-600">
-            {state.activeUser
-              ? 'Torne seu perfil público nas configurações para aparecer aqui.'
-              : 'Crie um perfil e torne-o público para aparecer aqui.'}
-          </p>
-        </div>
+      {/* Logged-in view: show own profile card */}
+      {isLoggedIn ? (
+        <ActiveUserCard onLogout={logout} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {state.userSummaries.map(summary => (
-            <UserCard
-              key={summary.username}
-              summary={summary}
-              isActive={summary.username === state.activeUser}
-              onSelect={handleLogin}
-              onLogout={logout}
-              totalFilms={totalFilms}
-            />
-          ))}
+        /* Not logged in: login or register */
+        <div className="space-y-4">
+          {!showRegister ? (
+            <div className="card p-5">
+              <p className="meta-label mb-4">Entrar na sua conta</p>
+              <LoginForm onLogin={login} />
+              <p className="text-xs text-gray-600 text-center mt-4">
+                Não tem conta?{' '}
+                <button onClick={() => setShowRegister(true)} className="text-gold hover:text-gold-light underline">
+                  Criar conta
+                </button>
+              </p>
+            </div>
+          ) : (
+            <div className="card p-5">
+              <p className="meta-label mb-4">Criar nova conta</p>
+              <RegisterForm onRegister={register} />
+              <p className="text-xs text-gray-600 text-center mt-4">
+                Já tem conta?{' '}
+                <button onClick={() => setShowRegister(false)} className="text-gold hover:text-gold-light underline">
+                  Fazer login
+                </button>
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,9 +1,10 @@
 const express = require('express');
-const { getUser, updateUserSettings } = require('../data/repositories/userRepository');
+const { getUser, getUserByNick, getUserByEmail, updateUserSettings } = require('../data/repositories/userRepository');
 const { updateFilmState } = require('../data/repositories/filmRepository');
+const { getUserTimeline } = require('../data/repositories/logRepository');
 const { hashPassword, verifyPassword } = require('../data/auth');
 const { buildBootstrapAsync } = require('../data/services/bootstrapService');
-const { authenticate, requireSameUserOrAdmin } = require('../middleware/auth');
+const { authenticate, optionalAuth, requireSameUserOrAdmin, requireSameNickOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -16,6 +17,28 @@ router.get('/', async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error('Get users error:', err);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+// ── User timeline (public for non-private users) ──────────────────────────────
+router.get('/:nick/timeline', optionalAuth, async (req, res) => {
+  try {
+    const nick = String(req.params.nick || '').trim().toLowerCase();
+    const user = await getUserByNick(nick);
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+
+    // Private profiles: only the user themselves or admin can see
+    const requesterNick = req.user?.nick;
+    const requesterRole = req.user?.role;
+    if (user.isPrivate && requesterNick !== nick && requesterRole !== 'admin') {
+      return res.status(403).json({ error: 'Este perfil é privado.' });
+    }
+
+    const timeline = await getUserTimeline(user.id);
+    res.json({ nick: user.nick, username: user.username, timeline });
+  } catch (err) {
+    console.error('Timeline error:', err);
     res.status(500).json({ error: 'Erro interno do servidor.' });
   }
 });
@@ -43,6 +66,16 @@ router.patch('/:username/films/:filmId', authenticate, requireSameUserOrAdmin, a
     }
 
     const fs = await updateFilmState(username, filmId, edition, updates);
+
+    // Log film activity (fire-and-forget)
+    const { logAction } = require('../data/repositories/logRepository');
+    if (updates.watched === true) {
+      logAction(user.id, 'film_watch', filmId, 'film', { edition }).catch(() => {});
+    }
+    if (updates.personalRating !== undefined && updates.personalRating !== null) {
+      logAction(user.id, 'film_rate', filmId, 'film', { rating: updates.personalRating, edition }).catch(() => {});
+    }
+
     res.json({ ok: true, filmState: fs });
   } catch (err) {
     console.error('Update film error:', err);
@@ -51,7 +84,6 @@ router.patch('/:username/films/:filmId', authenticate, requireSameUserOrAdmin, a
 });
 
 // ── User self-service settings ─────────────────────────────────────────────
-// Allows users to change their own password and toggle privacy.
 router.patch('/:username/settings', authenticate, requireSameUserOrAdmin, async (req, res) => {
   try {
     const username = String(req.params.username || '').trim();
@@ -65,14 +97,38 @@ router.patch('/:username/settings', authenticate, requireSameUserOrAdmin, async 
       changes.isPrivate = Boolean(req.body.isPrivate);
     }
 
+    // Profile fields
+    if (req.body.firstName !== undefined) {
+      const v = String(req.body.firstName || '').trim();
+      if (v.length > 60) return res.status(400).json({ error: 'Nome muito longo (máx. 60 caracteres).' });
+      changes.firstName = v || null;
+    }
+    if (req.body.lastName !== undefined) {
+      const v = String(req.body.lastName || '').trim();
+      if (v.length > 60) return res.status(400).json({ error: 'Sobrenome muito longo (máx. 60 caracteres).' });
+      changes.lastName = v || null;
+    }
+    if (req.body.birthDate !== undefined) {
+      changes.birthDate = req.body.birthDate ? String(req.body.birthDate).trim() : null;
+    }
+    if (req.body.email !== undefined) {
+      const newEmail = String(req.body.email || '').trim().toLowerCase();
+      if (newEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+        return res.status(400).json({ error: 'Email inválido.' });
+      }
+      if (newEmail && newEmail !== user.email) {
+        const taken = await getUserByEmail(newEmail);
+        if (taken) return res.status(409).json({ error: 'Esse email já está em uso.' });
+      }
+      changes.email = newEmail || null;
+    }
+
     // Password change: requires current password (unless requester is admin)
     if (req.body.newPassword !== undefined) {
       const newPw = String(req.body.newPassword || '');
       if (newPw.length < 6 || newPw.length > 100) {
         return res.status(400).json({ error: 'Nova senha inválida (mín. 6 caracteres).' });
       }
-
-      // Non-admins must provide current password
       if (req.user.role !== 'admin') {
         const currentPw = String(req.body.currentPassword || '');
         if (!currentPw) return res.status(400).json({ error: 'Senha atual é obrigatória.' });
@@ -80,7 +136,6 @@ router.patch('/:username/settings', authenticate, requireSameUserOrAdmin, async 
           return res.status(401).json({ error: 'Senha atual incorreta.' });
         }
       }
-
       changes.newPasswordHash = hashPassword(newPw);
     }
 

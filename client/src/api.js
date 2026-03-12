@@ -102,10 +102,10 @@ export const api = {
   awards: () => request('/api/awards'),
 
   // Login — returns { accessToken, ...bootstrapData }
-  login: async (username, password) => {
+  login: async (nick, password) => {
     const data = await request('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ nick, password }),
     });
     if (data.accessToken) {
       setTokens(data.accessToken);
@@ -114,10 +114,10 @@ export const api = {
   },
 
   // Register — returns { accessToken, ...bootstrapData }
-  register: async (username, password) => {
+  register: async ({ nick, password, firstName, lastName, email, birthDate }) => {
     const data = await request('/api/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ nick, password, firstName, lastName, email, birthDate }),
     });
     if (data.accessToken) {
       setTokens(data.accessToken);
@@ -176,6 +176,10 @@ export const api = {
       body: JSON.stringify(patch),
     }),
 
+  // User timeline (public for non-private users)
+  getUserTimeline: (nick) =>
+    request(`/api/users/${encodeURIComponent(nick)}/timeline`),
+
   // Admin endpoints
   admin: {
     listUsers: (edition = '') =>
@@ -195,6 +199,12 @@ export const api = {
     unblock: (username) =>
       request(`/api/admin/users/${encodeURIComponent(username)}/unblock`, {
         method: 'POST',
+      }),
+
+    changePassword: (nick, newPassword) =>
+      request(`/api/admin/users/${encodeURIComponent(nick)}/password`, {
+        method: 'PATCH',
+        body: JSON.stringify({ newPassword }),
       }),
   },
 };

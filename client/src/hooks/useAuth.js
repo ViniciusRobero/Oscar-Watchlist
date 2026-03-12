@@ -22,18 +22,21 @@ export function useAuth() {
     dispatch({ type: 'HYDRATE', payload: data });
   }, [dispatch]);
 
-  const login = useCallback(async (username, password) => {
-    const data = await api.login(username, password);
-    if (username) localStorage.setItem('oscar_active_user', username);
-    hydrate({ ...data, isAuthenticated: true, userRole: data.userRole || 'user' });
-    showToast(`Bem-vindo, ${username}!`);
+  const login = useCallback(async (nick, password) => {
+    const data = await api.login(nick, password);
+    const displayName = data.nick || data.activeUser || nick;
+    if (displayName) localStorage.setItem('oscar_active_user', displayName);
+    hydrate({ ...data, isAuthenticated: true, userRole: data.userRole || 'user', nick: data.nick || nick });
+    showToast(`Bem-vindo, ${displayName}!`);
   }, [hydrate, showToast]);
 
-  const register = useCallback(async (username, password) => {
-    const data = await api.register(username, password);
-    if (username) localStorage.setItem('oscar_active_user', username);
-    hydrate({ ...data, isAuthenticated: true, userRole: 'user' });
-    showToast(`Conta criada! Bem-vindo, ${username}!`);
+  const register = useCallback(async (profileData) => {
+    const data = await api.register(profileData);
+    const { nick } = profileData;
+    const displayName = data.nick || data.activeUser || nick;
+    if (displayName) localStorage.setItem('oscar_active_user', displayName);
+    hydrate({ ...data, isAuthenticated: true, userRole: 'user', nick: data.nick || nick });
+    showToast(`Conta criada! Bem-vindo, ${displayName}!`);
   }, [hydrate, showToast]);
 
   const logout = useCallback(async () => {
@@ -42,6 +45,7 @@ export function useAuth() {
       type: 'HYDRATE',
       payload: {
         activeUser: '',
+        nick: '',
         profile: { films: {}, predictions: {} },
         officialResults: {},
         isAuthenticated: false,

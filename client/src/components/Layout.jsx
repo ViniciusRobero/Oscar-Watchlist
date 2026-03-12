@@ -128,6 +128,12 @@ function UserDropdown({ onClose, onNavigate }) {
               Configurações
             </button>
             <button
+              onClick={() => { onNavigate('timeline'); onClose(); }}
+              className="btn btn-ghost text-xs py-1.5 px-3 flex-1"
+            >
+              Timeline
+            </button>
+            <button
               onClick={handleLogout}
               className="btn text-xs py-1.5 px-3 text-red-400 border-red-900/40 hover:border-red-700/60"
             >

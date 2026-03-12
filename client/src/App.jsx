@@ -9,6 +9,7 @@ import { UsersPage } from './pages/UsersPage.jsx';
 import { PredictionsPage } from './pages/PredictionsPage.jsx';
 import { OscarNightPage } from './pages/OscarNightPage.jsx';
 import { ComparePage } from './pages/ComparePage.jsx';
+import { TimelinePage } from './pages/TimelinePage.jsx';
 import { Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SkeletonFilmCard } from './components/SkeletonFilmCard.jsx';
@@ -79,6 +80,7 @@ function AppInner() {
     predictions: <PredictionsPage />,
     'oscar-night': <OscarNightPage />,
     compare: <ComparePage />,
+    timeline: <TimelinePage />,
   };
 
   // Show Hub if no award selected and multiple active awards exist

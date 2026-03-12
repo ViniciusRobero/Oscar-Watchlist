@@ -88,6 +88,8 @@ async function buildBootstrapAsync(username, editionId) {
     users: usersList,
     userSummaries: summaries,
     activeUser: username || '',
+    nick: user?.nick || username || '',
+    userRole: user?.role || 'user',
     profile,
     officialResults,
   };

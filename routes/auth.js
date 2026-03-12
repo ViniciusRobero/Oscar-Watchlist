@@ -1,9 +1,10 @@
 const express = require('express');
-const { getUser, createUser } = require('../data/repositories/userRepository');
+const { getUser, getUserByNick, getUserByEmail, createUser } = require('../data/repositories/userRepository');
 const { hashPassword, verifyPassword } = require('../data/auth');
 const { buildBootstrapAsync, summarizeUsers } = require('../data/services/bootstrapService');
 const { generateTokensAsync, verifyRefreshAsync, revokeRefreshTokenAsync } = require('../middleware/auth');
 const { checkLockout, recordFail, clearLockout } = require('../lib/bruteForce');
+const { sendWelcomeEmail } = require('../data/services/emailService');
 
 const router = express.Router();
 
@@ -23,24 +24,25 @@ const REFRESH_COOKIE_OPTS = {
 
 router.post('/login', async (req, res) => {
   try {
-    const username = String(req.body.username || '').trim();
+    // Accept both 'nick' and legacy 'username' for backward compatibility
+    const nick = String(req.body.nick || req.body.username || '').trim().toLowerCase();
     const password = String(req.body.password || '').trim();
     const edition = req.query.edition || req.body?.edition || '';
 
-    if (!username) return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
+    if (!nick) return res.status(400).json({ error: 'Nick é obrigatório.' });
     if (!password) return res.status(400).json({ error: 'Senha é obrigatória.' });
 
     // Brute force check
-    const lockMsg = checkLockout(username);
+    const lockMsg = checkLockout(nick);
     if (lockMsg) return res.status(429).json({ error: lockMsg });
 
-    const existingUser = await getUser(username);
+    const existingUser = await getUserByNick(nick);
 
     if (!existingUser) {
-      return res.status(404).json({ error: 'Usuário não encontrado. Use o registro para criar uma conta.' });
+      recordFail(nick);
+      return res.status(404).json({ error: 'Nick não encontrado. Verifique ou crie uma conta.' });
     }
 
-    // Inactive account check
     if (!existingUser.isActive) {
       return res.status(403).json({ error: 'Esta conta foi desativada. Entre em contato com o administrador.' });
     }
@@ -48,17 +50,17 @@ router.post('/login', async (req, res) => {
     if (existingUser.passwordHash) {
       const valid = verifyPassword(password, existingUser.passwordHash);
       if (!valid) {
-        recordFail(username);
+        recordFail(nick);
         return res.status(401).json({ error: 'Senha incorreta.' });
       }
     } else {
       return res.status(401).json({ error: 'Sua conta precisa ser migrada.' });
     }
 
-    clearLockout(username);
+    clearLockout(nick);
 
     const { accessToken, refreshToken } = await generateTokensAsync(existingUser);
-    const bootstrapData = await buildBootstrapAsync(username, edition);
+    const bootstrapData = await buildBootstrapAsync(existingUser.username, edition);
 
     res.cookie(COOKIE_NAME, refreshToken, REFRESH_COOKIE_OPTS);
     res.json({ accessToken, ...bootstrapData });
@@ -70,30 +72,53 @@ router.post('/login', async (req, res) => {
 
 router.post('/register', async (req, res) => {
   try {
-    const username = String(req.body.username || '').trim();
+    const nick = String(req.body.nick || '').trim().toLowerCase();
     const password = String(req.body.password || '').trim();
+    const firstName = String(req.body.firstName || '').trim();
+    const lastName = String(req.body.lastName || '').trim();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const birthDate = req.body.birthDate ? String(req.body.birthDate).trim() : null;
     const edition = req.query.edition || req.body?.edition || '';
 
-    if (!username || username.length < 2 || username.length > 40) {
-      return res.status(400).json({ error: 'Nome de usuário inválido.' });
+    // Validations
+    if (!nick || nick.length < 3 || nick.length > 20) {
+      return res.status(400).json({ error: 'Nick deve ter entre 3 e 20 caracteres.' });
     }
-    if (!/^[a-zA-Z0-9À-ÿ_ -]+$/.test(username)) {
-      return res.status(400).json({ error: 'Nome de usuário contém caracteres inválidos.' });
+    if (!/^[a-z0-9_.]+$/.test(nick)) {
+      return res.status(400).json({ error: 'Nick pode conter apenas letras minúsculas, números, ponto e underscore.' });
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Email inválido.' });
+    }
+    if (!firstName || firstName.length < 1 || firstName.length > 60) {
+      return res.status(400).json({ error: 'Nome é obrigatório (máx. 60 caracteres).' });
+    }
+    if (!lastName || lastName.length < 1 || lastName.length > 60) {
+      return res.status(400).json({ error: 'Sobrenome é obrigatório (máx. 60 caracteres).' });
     }
     if (!password || password.length < 6 || password.length > 100) {
       return res.status(400).json({ error: 'Senha inválida (mín. 6 caracteres).' });
     }
 
-    const existingUser = await getUser(username);
-    if (existingUser) {
-      return res.status(409).json({ error: 'Esse nome de usuário já existe.' });
+    // Uniqueness checks
+    const existingByNick = await getUserByNick(nick);
+    if (existingByNick) {
+      return res.status(409).json({ error: 'Esse nick já está em uso.' });
+    }
+    const existingByEmail = await getUserByEmail(email);
+    if (existingByEmail) {
+      return res.status(409).json({ error: 'Esse email já está cadastrado.' });
     }
 
     const ph = hashPassword(password);
-    const newUser = await createUser(username, ph, 'user');
+    // username = nick (display name)
+    const newUser = await createUser(nick, ph, 'user', { nick, email, firstName, lastName, birthDate });
 
     const { accessToken, refreshToken } = await generateTokensAsync(newUser);
-    const bootstrapData = await buildBootstrapAsync(username, edition);
+    const bootstrapData = await buildBootstrapAsync(newUser.username, edition);
+
+    // Send welcome email in background — do not block response
+    sendWelcomeEmail(email, { nick, firstName }).catch(() => {});
 
     res.cookie(COOKIE_NAME, refreshToken, REFRESH_COOKIE_OPTS);
     res.status(201).json({ accessToken, ...bootstrapData });
@@ -118,8 +143,12 @@ router.post('/refresh', async (req, res) => {
 
     await revokeRefreshTokenAsync(refreshToken);
 
-    const tokens = await generateTokensAsync({
+    // Reload user to get latest nick
+    const user = await getUser(payload.username);
+    const tokens = await generateTokensAsync(user || {
+      id: payload.id,
       username: payload.username,
+      nick: payload.nick || payload.username,
       role: payload.role,
     });
 
@@ -149,7 +178,7 @@ router.post('/logout', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const edition = req.query.edition || '';
-    // Public list: only non-private, active users
+    // Public list: only non-private, active users (no personal data exposed)
     const summaries = await summarizeUsers(edition, { publicOnly: true });
     const usernames = summaries.map(s => s.username);
     res.json({ usernames });

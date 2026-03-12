@@ -13,6 +13,7 @@ async function generateTokensAsync(user) {
     const payload = {
         id: user.id || user.username,
         username: user.username,
+        nick: user.nick || user.username,
         role: user.role || 'user',
     };
 
@@ -114,11 +115,23 @@ function requireSameUserOrAdmin(req, res, next) {
     next();
 }
 
+function requireSameNickOrAdmin(req, res, next) {
+    const paramNick = req.params.nick;
+    if (!req.user) {
+        return res.status(401).json({ error: 'Não autenticado.' });
+    }
+    if (req.user.nick !== paramNick && req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Você não pode alterar dados de outro usuário.' });
+    }
+    next();
+}
+
 // Temporary synchronous fallback for tests that manually construct tokens
 function generateTokens(user) {
     const payload = {
         id: user.id || user.username,
         username: user.username,
+        nick: user.nick || user.username,
         role: user.role || 'user',
     };
     const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY, issuer: 'oscar-watchlist' });
@@ -137,5 +150,6 @@ module.exports = {
     optionalAuth,
     requireAdmin,
     requireSameUserOrAdmin,
+    requireSameNickOrAdmin,
     JWT_SECRET,
 };
