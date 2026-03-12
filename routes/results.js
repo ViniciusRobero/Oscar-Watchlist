@@ -1,5 +1,8 @@
 const express = require('express');
-const { loadCategories, getOfficialResults, updateOfficialResult, getUser, getPredictionsMap } = require('../data/db');
+const { loadCategories } = require('../data/services/editionService');
+const { getOfficialResults, updateOfficialResult } = require('../data/repositories/resultRepository');
+const { getUser } = require('../data/repositories/userRepository');
+const { getPredictionsMap } = require('../data/repositories/predictionRepository');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -7,9 +10,9 @@ const router = express.Router();
 function resolveFilmId(cats, categoryId, nomineeId) {
   if (!nomineeId) return null;
   const cat = cats.find((c) => c.id === categoryId);
-  if (!cat) return nomineeId;
+  if (!cat) return null;
   const nominee = cat.nominees?.find((n) => n.id === nomineeId);
-  return nominee?.filmId || nomineeId;
+  return nominee?.filmId || null;
 }
 
 // Set official winner for a category (ADMIN ONLY)

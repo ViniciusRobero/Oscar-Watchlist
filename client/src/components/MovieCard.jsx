@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Star, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
+import { useFilmState } from '../hooks/useFilmState.js';
 import { motion } from 'framer-motion';
 
 const availColors = {
@@ -44,7 +45,8 @@ function usePoster(film) {
 }
 
 export function MovieCard({ film, onOpen }) {
-  const { state, getFilmState, updateFilm, showToast } = useApp();
+  const { state, showToast } = useApp();
+  const { getFilmState, updateFilm } = useFilmState();
   const fs = getFilmState(film.id);
   const hasUser = !!state.activeUser;
   const posterSrc = usePoster(film);

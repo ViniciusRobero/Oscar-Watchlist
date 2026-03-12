@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Trophy, Check, X as XIcon, Lock, Unlock, Star } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
+import { usePredictions } from '../hooks/usePredictions.js';
 
 function NomineeDisplay({ nomineeId, category, filmById }) {
   if (!nomineeId) return <span className="text-sm text-gray-600 italic">sem palpite</span>;
@@ -134,7 +135,8 @@ function ResultRow({ category, prediction, officialNomineeId, onSetWinner, isAdm
 }
 
 export function OscarNightPage() {
-  const { state, setOfficialWinner, showToast, filmById } = useApp();
+  const { state, showToast, filmById } = useApp();
+  const { setOfficialWinner } = usePredictions();
   const [isAdmin, setIsAdmin] = useState(false);
   const hasUser = !!state.activeUser;
 

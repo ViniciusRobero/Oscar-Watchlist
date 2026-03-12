@@ -1,5 +1,8 @@
 const express = require('express');
-const { updateFilmState, buildBootstrapAsync, getUser } = require('../data/db');
+const { getUser, updateUserSettings } = require('../data/repositories/userRepository');
+const { updateFilmState } = require('../data/repositories/filmRepository');
+const { hashPassword, verifyPassword } = require('../data/auth');
+const { buildBootstrapAsync } = require('../data/services/bootstrapService');
 const { authenticate, requireSameUserOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -43,6 +46,52 @@ router.patch('/:username/films/:filmId', authenticate, requireSameUserOrAdmin, a
     res.json({ ok: true, filmState: fs });
   } catch (err) {
     console.error('Update film error:', err);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+// ── User self-service settings ─────────────────────────────────────────────
+// Allows users to change their own password and toggle privacy.
+router.patch('/:username/settings', authenticate, requireSameUserOrAdmin, async (req, res) => {
+  try {
+    const username = String(req.params.username || '').trim();
+    const user = await getUser(username);
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+
+    const changes = {};
+
+    // Privacy toggle
+    if (req.body.isPrivate !== undefined) {
+      changes.isPrivate = Boolean(req.body.isPrivate);
+    }
+
+    // Password change: requires current password (unless requester is admin)
+    if (req.body.newPassword !== undefined) {
+      const newPw = String(req.body.newPassword || '');
+      if (newPw.length < 6 || newPw.length > 100) {
+        return res.status(400).json({ error: 'Nova senha inválida (mín. 6 caracteres).' });
+      }
+
+      // Non-admins must provide current password
+      if (req.user.role !== 'admin') {
+        const currentPw = String(req.body.currentPassword || '');
+        if (!currentPw) return res.status(400).json({ error: 'Senha atual é obrigatória.' });
+        if (!verifyPassword(currentPw, user.passwordHash)) {
+          return res.status(401).json({ error: 'Senha atual incorreta.' });
+        }
+      }
+
+      changes.newPasswordHash = hashPassword(newPw);
+    }
+
+    if (Object.keys(changes).length === 0) {
+      return res.status(400).json({ error: 'Nenhuma alteração enviada.' });
+    }
+
+    await updateUserSettings(username, changes);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Update settings error:', err);
     res.status(500).json({ error: 'Erro interno do servidor.' });
   }
 });

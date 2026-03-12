@@ -64,12 +64,16 @@ async function tryRefresh() {
 
   _refreshPromise = (async () => {
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
       // The browser sends the HttpOnly cookie automatically via credentials: 'include'
       const res = await fetch('/api/auth/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       if (!res.ok) {
         clearTokens();
         return false;
@@ -164,4 +168,33 @@ export const api = {
 
   compareWithOfficial: (username) =>
     request(`/api/results/compare/official/${encodeURIComponent(username)}`),
+
+  // User self-service settings (password change, privacy)
+  updateSettings: (username, patch) =>
+    request(`/api/users/${encodeURIComponent(username)}/settings`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+
+  // Admin endpoints
+  admin: {
+    listUsers: (edition = '') =>
+      request(`/api/admin/users${edition ? `?edition=${encodeURIComponent(edition)}` : ''}`),
+
+    setActive: (username, isActive) =>
+      request(`/api/admin/users/${encodeURIComponent(username)}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isActive }),
+      }),
+
+    deleteUser: (username) =>
+      request(`/api/admin/users/${encodeURIComponent(username)}`, {
+        method: 'DELETE',
+      }),
+
+    unblock: (username) =>
+      request(`/api/admin/users/${encodeURIComponent(username)}/unblock`, {
+        method: 'POST',
+      }),
+  },
 };

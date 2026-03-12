@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trophy, ChevronDown, ChevronUp, Check, AlertCircle, User } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
+import { usePredictions } from '../hooks/usePredictions.js';
 
 // ── Lazy poster cache ─────────────────────────────────────────────────────────
 const posterCache = {};
@@ -163,7 +164,8 @@ function CategoryCard({ category, films, prediction, onSelect, disabled }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export function PredictionsPage() {
-  const { state, savePrediction, showToast } = useApp();
+  const { state, showToast } = useApp();
+  const { savePrediction } = usePredictions();
   const hasUser = !!state.activeUser;
 
   const totalCategories = state.categories.length;

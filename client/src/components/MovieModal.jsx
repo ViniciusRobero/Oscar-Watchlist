@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, Star, ExternalLink, Eye, EyeOff, Film, AlertCircle, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
+import { useFilmState } from '../hooks/useFilmState.js';
 import { motion, AnimatePresence } from 'framer-motion';
+import { safeUrl } from '../utils/safeUrl.js';
 
 // Lazy-load poster from server
 const posterCache = {};
@@ -54,7 +56,8 @@ function StarRating({ value, onChange, readonly = false }) {
 }
 
 export function MovieModal({ film, onClose }) {
-  const { state, getFilmState, updateFilm, showToast } = useApp();
+  const { state, showToast } = useApp();
+  const { getFilmState, updateFilm } = useFilmState();
   const filmState = getFilmState(film?.id);
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
@@ -191,8 +194,8 @@ export function MovieModal({ film, onClose }) {
 
                 {/* Links */}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {film.imdbUrl ? (
-                    <a href={film.imdbUrl} target="_blank" rel="noopener noreferrer" className="btn text-xs py-1.5 px-3">
+                  {film.imdbUrl && safeUrl(film.imdbUrl) ? (
+                    <a href={safeUrl(film.imdbUrl)} target="_blank" rel="noopener noreferrer" className="btn text-xs py-1.5 px-3">
                       <ExternalLink className="w-3 h-3" />
                       IMDb
                     </a>
@@ -201,11 +204,12 @@ export function MovieModal({ film, onClose }) {
                       <AlertCircle className="w-3 h-3" /> Link IMDb pendente
                     </span>
                   )}
-                  {film.watchLinks?.map((link, i) =>
-                    link.url ? (
+                  {film.watchLinks?.map((link, i) => {
+                    const href = safeUrl(link.url);
+                    return href ? (
                       <a
                         key={i}
-                        href={link.url}
+                        href={href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`btn text-xs py-1.5 px-3 ${link.status !== 'confirmed' ? 'opacity-70' : ''}`}
@@ -215,8 +219,8 @@ export function MovieModal({ film, onClose }) {
                         {link.label || 'Assistir'}
                         {link.status !== 'confirmed' && <AlertCircle className="w-3 h-3 text-yellow-600" />}
                       </a>
-                    ) : null
-                  )}
+                    ) : null;
+                  })}
                 </div>
               </div>
             </div>

@@ -4,7 +4,9 @@ const request = require('supertest');
 
 process.env.TURSO_URL = `file:${path.join(__dirname, '..', 'data', 'test_api.db')}`;
 const app = require('../server');
-const db = require('../data/db');
+const { dbClient } = require('../config/db');
+const { migrateSchema, hashPassword } = require('../data/auth');
+const { createUser } = require('../data/repositories/userRepository');
 const { generateTokens } = require('../middleware/auth');
 
 const TEST_EDITION = '__test_api__';
@@ -24,9 +26,10 @@ beforeAll(async () => {
     ]));
 
     const schemaSql = fs.readFileSync(path.join(__dirname, '..', 'data', 'schema.sql'), 'utf8');
-    await db.dbClient.executeMultiple(schemaSql);
+    await dbClient.executeMultiple(schemaSql);
+    await migrateSchema();
 
-    await db.dbClient.executeMultiple(`
+    await dbClient.executeMultiple(`
     DELETE FROM user_predictions;
     DELETE FROM user_film_states;
     DELETE FROM refresh_tokens;
@@ -34,8 +37,8 @@ beforeAll(async () => {
     DELETE FROM users;
   `);
 
-    await db.createUser('api_user', db.hashPassword('123456'), 'user');
-    await db.createUser('api_admin', db.hashPassword('123456'), 'admin');
+    await createUser('api_user', hashPassword('123456'), 'user');
+    await createUser('api_admin', hashPassword('123456'), 'admin');
 
     userToken = generateTokens({ username: 'api_user', role: 'user' }).accessToken;
     adminToken = generateTokens({ username: 'api_admin', role: 'admin' }).accessToken;

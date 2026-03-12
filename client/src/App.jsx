@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext.jsx';
+import { useEdition } from './hooks/useEdition.js';
 import { Layout } from './components/Layout.jsx';
 import { Toast } from './components/Toast.jsx';
 import { HubPage } from './pages/HubPage.jsx';
@@ -14,7 +15,8 @@ import { SkeletonFilmCard } from './components/SkeletonFilmCard.jsx';
 import { setCurrentEdition } from './api.js';
 
 function AppInner() {
-  const { state, bootstrap, switchEdition } = useApp();
+  const { state, bootstrap } = useApp();
+  const { switchEdition } = useEdition();
   const [activePage, setActivePage] = useState('watchlist');
   // null = Hub view; otherwise the award object selected by the user
   const [selectedAward, setSelectedAward] = useState(null);

@@ -1,5 +1,5 @@
 const express = require('express');
-const { updatePrediction, getPredictionsMap } = require('../data/db');
+const { updatePrediction, getPredictionsMap } = require('../data/repositories/predictionRepository');
 const { authenticate, requireSameUserOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();

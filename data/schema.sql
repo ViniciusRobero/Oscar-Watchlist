@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT UNIQUE,
     password_hash TEXT,
     role TEXT DEFAULT 'user' CHECK(role IN ('user', 'admin')),
+    is_active INTEGER NOT NULL DEFAULT 1,
+    is_private INTEGER NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

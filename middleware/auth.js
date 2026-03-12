@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { getRefreshToken, storeRefreshToken, revokeRefreshToken } = require('../data/db');
+const { getRefreshToken, storeRefreshToken, revokeRefreshToken } = require('../data/repositories/tokenRepository');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'oscar-watchlist-dev-secret-change-me';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'oscar-watchlist-refresh-dev-secret';

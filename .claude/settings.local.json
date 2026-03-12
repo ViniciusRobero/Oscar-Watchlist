@@ -4,7 +4,11 @@
       "Bash(npm install:*)",
       "Bash(node -e \"const fs=require\\(''fs''\\); const d=JSON.parse\\(fs.readFileSync\\(''data/editions.json''\\)\\); d[0].award_id=''oscar''; fs.writeFileSync\\(''data/editions.json'', JSON.stringify\\(d,null,4\\)\\);\")",
       "Bash(npm test:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(\"c:/personal/oscar watchlist/Oscar-Watchlist/data/schema.sql\":*)",
+      "Bash(find '/c/personal/oscar watchlist/Oscar-Watchlist' -name *.js -path */lib/* -o -name *.js -path */client/src/pages/*)",
+      "Bash(npm run:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }
