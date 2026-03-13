@@ -53,7 +53,7 @@ async function createUser(username, passwordHash, role = 'user', profile = {}) {
   await dbClient.execute({
     sql: `INSERT INTO users
           (id, username, nick, password_hash, role, is_active, is_private, email, first_name, last_name, birth_date)
-          VALUES (?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?)`,
     args: [uname, uname, nickVal, passwordHash, role, email, firstName, lastName, birthDate]
   });
   return await getUser(uname);
